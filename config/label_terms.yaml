@@ -1,0 +1,116 @@
+opacity_observation_terms:
+  - opacity
+  - opacities
+  - infiltrate
+  - infiltrates
+  - infiltrative
+  - airspace
+  - air-space
+  - air space
+  - consolidation
+  - consolidations
+  - consolidative
+  - edema
+  - oedema
+  - pulmonary edema
+  - interstitial edema
+  - alveolar edema
+  - hazy
+  - haze
+  - disease
+  - densities
+  - density
+  - ground-glass
+  - ground glass
+  - interstitial
+
+consolidation_or_airspace_terms:
+  - airspace
+  - air-space
+  - air space
+  - consolidation
+  - consolidative
+  - pneumonia
+  - infiltrate
+  - infiltrates
+
+edema_terms:
+  - edema
+  - oedema
+  - pulmonary edema
+  - interstitial edema
+  - alveolar edema
+  - vascular congestion
+  - congestive
+  - CHF
+  - fluid overload
+
+atelectasis_terms:
+  - atelectasis
+  - atelectatic
+  - volume loss
+  - low volume
+
+left_anatomy_terms:
+  - left lung
+  - left hemithorax
+  - left base
+  - left lung base
+  - left lower lung
+  - left upper lung
+  - left mid lung
+  - left lower lobe
+  - left upper lobe
+  - left perihilar
+
+right_anatomy_terms:
+  - right lung
+  - right hemithorax
+  - right base
+  - right lung base
+  - right lower lung
+  - right upper lung
+  - right mid lung
+  - right lower lobe
+  - right upper lobe
+  - right perihilar
+
+bilateral_anatomy_terms:
+  - bilateral
+  - bilaterally
+  - both lungs
+  - bilateral lungs
+  - bilateral bases
+  - bibasilar
+  - biapical
+  - bilateral lower lobes
+  - bilateral lower lungs
+  - bilateral perihilar
+  - diffuse
+  - diffusely
+  - multifocal
+  - widespread
+  - generalized
+
+negating_context_terms:
+  - "no"
+  - without
+  - absent
+  - resolved
+  - cleared
+  - clear
+  - negative for
+  - free of
+
+uncertain_context_terms:
+  - possible
+  - possibly
+  - may represent
+  - could represent
+  - cannot exclude
+  - difficult to exclude
+  - questionable
+  - suspected
+  - likely
+  - probably
+  - favor

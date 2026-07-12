@@ -1,0 +1,42 @@
+target_construct: "report states or implies current bilateral pulmonary opacities/infiltrates"
+
+label_set:
+  build_strict_label: true
+  build_sensitive_label: true
+  primary_development_label: sensitive
+  primary_text_scope_for_silver_rules: full_report
+  retain_text_scope_sensitivity_fields:
+    - full_report
+    - impression_findings
+    - impression_fallback
+
+mimic_role: model_development_only
+
+manual_review:
+  v1_requirement: export_only
+  default_review_sample_size: 300
+  completed_human_review_required_for_v1: false
+
+edema:
+  include_in_sensitive: true
+  include_in_strict_when_explicit_bilateral: true
+  keep_subtype_flag: true
+  vascular_congestion_chf_fluid_overload: edema_subtype_only
+
+atelectasis:
+  include_in_sensitive: true
+  include_in_strict_when_explicit_bilateral: false
+  keep_subtype_flag: true
+
+chexpert_uncertain:
+  contributes_positive_sensitive_label_by_itself: false
+  weak_score_when_lung_opacity_uncertain: 0.30
+
+reference_naming:
+  automated_mimic_labels_prefix: silver
+  human_reviewed_mimic_labels_prefix: gold
+
+excluded_from_v1:
+  - Chest ImaGenome layer
+  - model bake-off training scripts
+  - local Intermountain deployment validation

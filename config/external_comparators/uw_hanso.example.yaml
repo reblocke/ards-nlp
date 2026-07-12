@@ -1,0 +1,21 @@
+name: uw_hanso_bilateral_infiltrates
+repository: https://github.com/uw-bionlp/ards.git
+commit: e9fc27f7034cc6b54f0ccdba4a58377948cf0258
+license: BSD-3-Clause
+external_repo_dir: data/external/uw_bionlp_ards
+model_dir: data/external/uw_bionlp_ards/model
+parameters_path: data/external/uw_bionlp_ards/model/parameters.pkl
+state_dict_path: data/external/uw_bionlp_ards/model/state_dict.pt
+expected_sha256:
+  parameters: VERIFY_AFTER_ACQUISITION
+  state_dict: VERIFY_AFTER_ACQUISITION
+terms_of_use: unknown
+container_image: ards-nlp-uw-hanso:legacy
+input_packet: artifacts/restricted/comparators/mimic_cxr_comparator_input.jsonl.gz
+input_manifest: artifacts/restricted/comparators/mimic_cxr_comparator_manifest.parquet
+smoke_input_packet: artifacts/restricted/comparators/smoke/input.jsonl.gz
+smoke_input_manifest: artifacts/restricted/comparators/smoke/manifest.parquet
+smoke_prediction_output: data/derived/comparators/smoke/uw_hanso_predictions.parquet
+prediction_output: data/derived/comparators/uw_hanso_predictions.parquet
+artifact_dir: artifacts/comparators/uw_hanso
+batch_size: 8

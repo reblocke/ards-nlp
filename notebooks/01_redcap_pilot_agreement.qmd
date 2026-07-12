@@ -1,0 +1,168 @@
+---
+title: "ARDS CXR Annotation Pilot: Agreement and Image-Report Alignment"
+jupyter: python3
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  error: true
+---
+
+## Purpose and annotation questions
+
+This pilot evaluates the reproducibility of continuous physician probability ratings for two
+separated assessments:
+
+- **Image rating:** the probability that the current chest radiograph shows bilateral pulmonary
+  opacities or infiltrates meeting the ARDS imaging criterion.
+- **Report rating:** the probability that the radiology report states or implies the same finding.
+
+Ratings remain on their original 0-100 scale. The analysis estimates agreement and alignment; it
+does not evaluate an NLP model or treat either assessment as a perfect gold standard.
+
+```{python}
+from pathlib import Path
+import sys
+
+from IPython.display import Image, display
+
+start = Path.cwd().resolve()
+root = next(candidate for candidate in [start, *start.parents] if (candidate / "pyproject.toml").exists())
+sys.path.insert(0, str(root / "src"))
+
+from ards_cxr_benchmark.pilot_annotation_agreement import (
+    default_annotation_pilot_config_path,
+    load_annotation_pilot_config,
+    run_annotation_pilot,
+)
+
+config = load_annotation_pilot_config(default_annotation_pilot_config_path())
+result = run_annotation_pilot(config)
+```
+
+## Configuration and input files
+
+Rater identity is supplied by the configured file-to-rater mapping. It is never inferred from row
+order, timestamps, or filenames. The report-text field is discarded during ingestion before the
+analysis tables are created.
+
+```{python}
+display(
+    result.input_qa_summary[
+        result.input_qa_summary["check"].isin(
+            [
+                "configured_raters",
+                "source_case_rater_rows",
+                "unique_cases",
+                "cases_present_for_all_raters",
+            ]
+        )
+    ].reset_index(drop=True)
+)
+```
+
+## Data validation and completeness
+
+Only ratings with the corresponding REDCap completion value of `2` and a valid value from 0 to
+100 enter the analysis. Incomplete and unverified ratings are audited but excluded.
+
+```{python}
+display(result.input_qa_summary.reset_index(drop=True))
+display(result.case_coverage_by_rater.reset_index(drop=True))
+```
+
+## Image inter-rater agreement
+
+ICC(2,1) estimates absolute agreement for one physician rating. ICC(2,k) estimates reliability of
+the mean across all configured physicians. ICC calculations use only cases completed by every
+rater; pairwise differences use all cases shared by each pair. Correlations describe association,
+not agreement.
+
+```{python}
+display(
+    result.rater_descriptive_summary[
+        result.rater_descriptive_summary["task"] == "image"
+    ].reset_index(drop=True)
+)
+display(
+    result.interrater_agreement_summary[
+        result.interrater_agreement_summary["task"] == "image"
+    ].reset_index(drop=True)
+)
+display(
+    result.pairwise_rater_agreement[
+        result.pairwise_rater_agreement["task"] == "image"
+    ].reset_index(drop=True)
+)
+display(Image(data=result.figure_paths["image_ratings_by_case"].read_bytes(), format="png"))
+```
+
+## Report inter-rater agreement
+
+The same estimands and denominators are used for report ratings.
+
+```{python}
+display(
+    result.rater_descriptive_summary[
+        result.rater_descriptive_summary["task"] == "report"
+    ].reset_index(drop=True)
+)
+display(
+    result.interrater_agreement_summary[
+        result.interrater_agreement_summary["task"] == "report"
+    ].reset_index(drop=True)
+)
+display(
+    result.pairwise_rater_agreement[
+        result.pairwise_rater_agreement["task"] == "report"
+    ].reset_index(drop=True)
+)
+display(Image(data=result.figure_paths["report_ratings_by_case"].read_bytes(), format="png"))
+```
+
+## Image-report alignment
+
+The primary comparison uses case-level means only when all configured physicians completed both
+tasks. Positive signed differences indicate that the mean report rating exceeded the mean image
+rating. Bootstrap confidence intervals resample cases.
+
+```{python}
+display(result.image_report_alignment_summary.reset_index(drop=True))
+display(result.within_rater_image_report_alignment.reset_index(drop=True))
+display(Image(data=result.figure_paths["image_report_scatter"].read_bytes(), format="png"))
+display(Image(data=result.figure_paths["image_report_bland_altman"].read_bytes(), format="png"))
+```
+
+## Highest-disagreement cases
+
+The restricted local review file lists the highest image inter-rater spreads, report inter-rater
+spreads, and absolute image-report differences. Case identifiers and individual ratings are not
+shown in this rendered report.
+
+```{python}
+display(result.disagreement_review_summary.reset_index(drop=True))
+```
+
+## Interpretation and pilot limitations
+
+Continuous ratings are the primary measurements. ICC and difference metrics assess agreement;
+correlation alone does not. Image-report comparisons measure alignment between assessments based
+on different information sources, not accuracy against a perfect reference test.
+
+These pilot estimates are expected to be imprecise with approximately 50 cases and three raters.
+The raters may not represent all clinicians, and image and report ratings are not interchangeable.
+No annotation-duration analysis is possible without explicit timing fields or REDCap audit-log
+data. This notebook does not evaluate any NLP model.
+
+## Output manifest
+
+All generated outputs remain local and ignored by git. Paths below are repository-relative and do
+not expose local absolute paths.
+
+```{python}
+display(result.output_manifest.reset_index(drop=True))
+```

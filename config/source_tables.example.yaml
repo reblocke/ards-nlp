@@ -1,0 +1,22 @@
+working_dataset: ards_mimic_cxr_benchmark
+
+staging_tables:
+  mimic_cxr_reports: stg_mimic_cxr_reports
+  mimic_cxr_record_list: stg_mimic_cxr_record_list
+  mimic_cxr_jpg_chexpert: stg_mimic_cxr_jpg_chexpert
+  mimic_cxr_jpg_negbio: stg_mimic_cxr_jpg_negbio
+  mimic_cxr_jpg_split: stg_mimic_cxr_jpg_split
+  radgraph_reports: stg_radgraph_reports
+  radgraph_entities: stg_radgraph_entities
+  radgraph_relations: stg_radgraph_relations
+
+native_bigquery_candidates:
+  - physionet-data.mimic_cxr
+  - physionet-data.mimic_cxr_jpg
+  - physionet-data.mimiciv_note
+  - physionet-data.mimiciv_cxr
+
+notes:
+  - Confirm actual provisioned PhysioNet datasets with sql/00_discover_physionet_datasets.sql.
+  - Prefer staging tables with normalized snake_case column names before running build SQL.
+  - Do not commit raw MIMIC report text or extracted report tables to git.

@@ -1,0 +1,28 @@
+name: amaral_xgboost_bilateral_infiltrates
+repository: https://github.com/amarallab/ARDS_diagnosis.git
+commit: 6154ac32e16dd9497a466351582603e1c1095a05
+license: GPL-2.0
+external_repo_dir: data/external/amarallab_ards_diagnosis
+model_path: src/bilateral_infiltrates_model.pkl
+vectorizer_path: src/bilateral_infiltrates_model_vectorizer.pkl
+segmentation_notebook: 02_segment_mimiciii.ipynb
+segmentation_module: src/segmentation_tools.py
+tokenizer_module: custom_functions.py
+license_path: LICENSE
+expected_sha256:
+  model: a72c2fe1cb5927f1f54b7aaea1775fa0480c2bfa788359241b6bbd551f362042
+  vectorizer: ddc982d5f9968175d7939e9600a960505dc54b7e7ae13686b266218da31c597f
+  segmentation_notebook: 204e327ec87b0bfb72259613e6b1cf3b062d03fd6cea7e1d2abdd1ee12268c7e
+  segmentation_module: a8d611fc423d16c2f8c7c971ab0d08a2694c83f28c150f48edd56df3b6220ed4
+  tokenizer_module: 1b60168f45a83d171839e4aa34546674bc28f69895e8f705596f08eda254acf7
+  license: 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643
+environment_dir: environments/amaral
+nltk_data_dir: data/external/amaral_nltk_data
+input_packet: artifacts/restricted/comparators/mimic_cxr_comparator_input.jsonl.gz
+input_manifest: artifacts/restricted/comparators/mimic_cxr_comparator_manifest.parquet
+preprocessing_config: artifacts/restricted/comparators/amaral/published_preprocessing_config.json
+runner_output_dir: artifacts/restricted/comparators/amaral/runner
+prediction_output: data/derived/comparators/amaral_bilateral_infiltrates_predictions.parquet
+artifact_dir: artifacts/comparators/amaral
+batch_size: 4096
+threshold: 0.5

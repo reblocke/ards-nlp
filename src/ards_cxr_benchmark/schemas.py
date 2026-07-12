@@ -1,0 +1,55 @@
+from __future__ import annotations
+
+SILVER_REFERENCE_REQUIRED_COLUMNS = [
+    "subject_id",
+    "study_id",
+    "report_text",
+    "findings_text",
+    "impression_text",
+    "target_text_full_report",
+    "target_text_impression_findings",
+    "target_text_impression_fallback",
+    "primary_target_text",
+    "chexpert_lung_opacity",
+    "chexpert_edema",
+    "chexpert_consolidation",
+    "chexpert_atelectasis",
+    "negbio_lung_opacity",
+    "negbio_edema",
+    "negbio_consolidation",
+    "negbio_atelectasis",
+    "has_mimic_cxr_jpg_labels",
+    "radgraph_left_opacity_present",
+    "radgraph_right_opacity_present",
+    "radgraph_bilateral_opacity_present",
+    "radgraph_bilateral_opacity_uncertain",
+    "regex_bilateral_opacity_present",
+    "regex_bilateral_opacity_uncertain",
+    "regex_bilateral_opacity_negated",
+    "bilateral_opacity_any",
+    "bilateral_opacity_non_atelectatic",
+    "bilateral_edema",
+    "bilateral_atelectasis",
+    "bilateral_consolidation_or_airspace",
+    "bilateral_ambiguous_or_uncertain",
+    "strict_bilateral_opacity_label",
+    "sensitive_bilateral_opacity_label",
+    "silver_bilateral_opacity_score",
+    "silver_label_source",
+    "manual_review_priority",
+    "qa_flags",
+    "created_at",
+    "pipeline_version",
+]
+
+REPORT_BASE_REQUIRED_COLUMNS = [
+    "subject_id",
+    "study_id",
+    "report_text",
+]
+
+RADGRAPH_STAGING_TABLES = [
+    "stg_radgraph_reports",
+    "stg_radgraph_entities",
+    "stg_radgraph_relations",
+]

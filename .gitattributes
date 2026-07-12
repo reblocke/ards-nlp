@@ -1,0 +1,6 @@
+config/clamp_ards_resource_manifest.json text eol=lf
+src/ards_cxr_benchmark/clamp_ards/data/*.json text eol=lf
+tests/fixtures/clamp_ards_external_resources/**/*.json text eol=lf
+tests/fixtures/clamp_ards_external_resources/**/*.txt text eol=lf
+tests/fixtures/clamp_ards_parity/** text eol=lf
+tests/fixtures/clamp_ards_parity/input/*.txt -text

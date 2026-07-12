@@ -1,0 +1,26 @@
+project:
+  expected_raters: 3
+  complete_status_value: 2
+  seed: 20260710
+  bootstrap_replicates: 2000
+
+inputs:
+  R01: data/restricted/annotations/rater_01_redcap.csv
+  R02: data/restricted/annotations/rater_02_redcap.csv
+  R03: data/restricted/annotations/rater_03_redcap.csv
+
+columns:
+  case_id: id_accession
+  record_id: id
+  secondary_record_id: id2
+  report_text: interpretation_text
+  raw_data_complete: raw_data_complete
+  report_rating: assessment_report
+  report_complete: adjudication_interpretation_complete
+  image_rating: assessment_image
+  image_complete: adjudication_image_complete
+
+outputs:
+  report_dir: reports/annotation_pilot
+  artifact_dir: artifacts/annotations/pilot
+  derived_dir: data/derived/annotations/pilot

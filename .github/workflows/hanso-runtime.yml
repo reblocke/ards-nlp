@@ -1,0 +1,35 @@
+name: HANSO Runtime
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/hanso-runtime.yml"
+      - "config/external_comparators/uw_hanso.example.yaml"
+      - "environments/uw_hanso/**"
+      - "scripts/external_runners/uw_hanso_runner.py"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-import:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Build pinned Linux runtime
+        run: docker build --platform linux/amd64 -t ards-nlp-uw-hanso:legacy environments/uw_hanso
+
+      - name: Fetch pinned UW source
+        run: |
+          git clone --no-checkout https://github.com/uw-bionlp/ards.git .hanso-source
+          git -C .hanso-source checkout --detach e9fc27f7034cc6b54f0ccdba4a58377948cf0258
+
+      - name: Verify upstream imports and spaCy model
+        run: |
+          docker run --rm --platform linux/amd64 \
+            -v "$PWD/.hanso-source:/external:ro" \
+            ards-nlp-uw-hanso:legacy \
+            python -c "import os, sys; os.chdir('/external'); sys.path.insert(0, '/external'); import process; import spacy; spacy.load('en_core_web_sm')"

@@ -1,0 +1,26 @@
+project:
+  expected_raters: 3
+  complete_status_value: 2
+  seed: 20260710
+  bootstrap_replicates: 100
+
+inputs:
+  R01: tests/fixtures/redcap_annotation/rater_01.csv
+  R02: tests/fixtures/redcap_annotation/rater_02.csv
+  R03: tests/fixtures/redcap_annotation/rater_03.csv
+
+columns:
+  case_id: id_accession
+  record_id: id
+  secondary_record_id: id2
+  report_text: interpretation_text
+  raw_data_complete: raw_data_complete
+  report_rating: assessment_report
+  report_complete: adjudication_interpretation_complete
+  image_rating: assessment_image
+  image_complete: adjudication_image_complete
+
+outputs:
+  report_dir: reports/annotation_pilot/smoke
+  artifact_dir: artifacts/annotations/pilot/smoke
+  derived_dir: data/derived/annotations/pilot/smoke

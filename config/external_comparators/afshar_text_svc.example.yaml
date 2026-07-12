@@ -1,0 +1,20 @@
+name: afshar_text_svc_full_ards
+repository: https://github.com/AfsharJoyceInfoLab/ARDS_Classifier.git
+commit: 0ede2cfab5349f6dcf3a05e04060ddd045db0095
+license: NONE_FOUND
+external_repo_dir: data/external/afshar_ards_classifier
+model_path: models/text_model.sav
+vectorizer_path: models/text_vectorizer.sav
+permission_status: unknown
+anchor_review_status: not_reviewed
+verified_target: full_ards_phenotype
+expected_sha256:
+  model: 8f4cf243e50b20cbc9f7acf62f0ed6546a0ee617d71510d25f7c7bedece8770c
+  vectorizer: 1997e2961803da878f07c2cdbf19890705ce30d6ccb61c70dcc310a1d1fe6326
+container_image: ards-nlp-afshar-svc:legacy
+input_packet: artifacts/restricted/comparators/mimic_cxr_comparator_input.jsonl.gz
+input_manifest: artifacts/restricted/comparators/mimic_cxr_comparator_manifest.parquet
+prediction_output: data/derived/comparators/afshar_text_svc_predictions.parquet
+artifact_dir: artifacts/comparators/afshar
+threshold: 0.5
+batch_size: 4096

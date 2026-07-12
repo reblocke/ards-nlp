@@ -1,0 +1,62 @@
+project:
+  name: ards-cxr-mimic-benchmark
+  seed: 1234
+  pipeline_version: v0.3.0
+
+gcp:
+  project_id: YOUR_GCP_PROJECT
+  location: US
+  bq_dataset: ards_mimic_cxr_benchmark
+  gcs_bucket: YOUR_GCS_BUCKET
+  physionet_project: physionet-data
+  source_dataset: mimic_cxr
+
+labels:
+  primary_text_scope: full_report
+
+paths:
+  report_root: data/raw/mimic-cxr/files
+  report_parquet: data/processed/mimic_cxr_reports.parquet
+  chexpert_csv: data/raw/mimic-cxr-jpg/mimic-cxr-2.0.0-chexpert.csv.gz
+  negbio_csv: data/raw/mimic-cxr-jpg/mimic-cxr-2.0.0-negbio.csv.gz
+  split_csv: data/raw/mimic-cxr-jpg/mimic-cxr-2.0.0-split.csv.gz
+  metadata_csv: data/raw/mimic-cxr-jpg/mimic-cxr-2.0.0-metadata.csv.gz
+  jpg_parquet_dir: data/processed/mimic_cxr_jpg
+  radgraph_json: data/raw/radgraph/MIMIC-CXR_graphs.json
+  radgraph_parquet_dir: data/processed/radgraph
+  qa_dir: artifacts/qa
+  sample_dir: artifacts/samples
+  export_dir: data/derived
+
+clamp_ards:
+  # CLAMP inputs contain report text; keep this workspace under ignored artifacts/restricted/.
+  clamp_project_root: artifacts/restricted/clamp_ards/workspace
+  project_name: ARDS
+  # Optional local CLAMP project/resources; this path is ignored by Git.
+  project_source_dir: data/external/clamp_ards_project
+  project_live_dir: artifacts/restricted/clamp_ards/workspace/ARDS
+  runtime_project_dir: C:/ClampWin_1.6.6/workspace/ARDS
+  input_dir: artifacts/restricted/clamp_ards/workspace/ARDS/Data/Input
+  output_dir: artifacts/restricted/clamp_ards/workspace/ARDS/Data/Output
+  # Canonical compact Stage 2 packet containing only CLAMP tabular TXT outputs.
+  output_archive: artifacts/restricted/clamp_ards/incoming/ARDS_CLAMP_Output_txt_only.zip
+  # Optional full XMI/TXT oracle. Stream members directly; never extract this archive.
+  full_output_archive: artifacts/restricted/clamp_ards/oracle/ARDS_CLAMP_Output_full.zip
+  output_packet_summary: artifacts/restricted/clamp_ards/clamp_output_packet_summary.json
+  restricted_artifact_dir: artifacts/restricted/clamp_ards
+  input_manifest: artifacts/restricted/clamp_ards/input_manifest.csv
+  input_summary: artifacts/restricted/clamp_ards/input_summary.json
+  handoff_markdown: artifacts/restricted/clamp_ards/NEXT_STEP_RUN_CLAMP.md
+  teacher_entity_output: data/derived/clamp_ards/clamp_legacy_entities.parquet
+  teacher_prediction_output: data/derived/clamp_ards/clamp_legacy_predictions.parquet
+  teacher_probabilistic_prediction_output: data/derived/clamp_ards/clamp_legacy_predictions_for_probabilistic_benchmark.parquet
+  teacher_output_audit: artifacts/restricted/clamp_ards/clamp_output_audit.csv
+  teacher_summary_output: artifacts/restricted/clamp_ards/clamp_teacher_summary.json
+  teacher_benchmark_dir: artifacts/clamp_ards/teacher_benchmark
+  # Python compatibility runner and strict restricted-parity outputs.
+  python_input: artifacts/restricted/comparators/mimic_cxr_comparator_input.jsonl.gz
+  python_entity_output: data/derived/clamp_ards/clamp_python_entities.parquet
+  python_prediction_output: data/derived/clamp_ards/clamp_python_predictions.parquet
+  python_summary_output: artifacts/restricted/clamp_ards/python/batch_summary.json
+  python_parity_summary: artifacts/restricted/clamp_ards/python/parity_summary.json
+  python_parity_mismatches: artifacts/restricted/clamp_ards/python/parity_mismatches.csv

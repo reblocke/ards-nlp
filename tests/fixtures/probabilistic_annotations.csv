@@ -1,0 +1,15 @@
+case_id,rater_id,review_task,probability_0_100,source_dataset,annotation_phase,review_status
+case_a,R01,report_only,80,synthetic,pilot,complete
+case_a,R02,report_only,60,synthetic,pilot,complete
+case_a,R01,image_only,70,synthetic,pilot,complete
+case_a,R02,image_only,90,synthetic,pilot,complete
+case_b,R01,report_only,20,synthetic,pilot,complete
+case_b,R02,report_only,30,synthetic,pilot,complete
+case_b,R01,image_only,10,synthetic,pilot,complete
+case_b,R02,image_only,20,synthetic,pilot,complete
+case_c,R01,report_only,50,synthetic,pilot,complete
+case_c,R02,report_only,70,synthetic,pilot,complete
+case_c,R03,report_only,90,synthetic,pilot,complete
+case_c,R01,image_only,40,synthetic,pilot,complete
+case_c,R02,image_only,60,synthetic,pilot,complete
+case_c,R03,image_only,70,synthetic,pilot,complete

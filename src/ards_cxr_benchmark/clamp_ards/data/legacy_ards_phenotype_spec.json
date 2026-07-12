@@ -1,0 +1,153 @@
+{
+  "attribution": {
+    "design_author": "Dan Knox",
+    "license": "MIT",
+    "scope": "Authorized ARDS dictionary, pipeline choices, and rule semantics re-expressed for this repository"
+  },
+  "dictionary": {
+    "case_sensitive": false,
+    "entries": [
+      {
+        "semantic_tag": "ARDS",
+        "term": "congestive heart failure"
+      },
+      {
+        "semantic_tag": "ARDS",
+        "term": "left and right-sided infiltrates"
+      },
+      {
+        "semantic_tag": "ARDS",
+        "term": "right and left-sided infiltrates"
+      },
+      {
+        "semantic_tag": "ARDS",
+        "term": "ARDS"
+      },
+      {
+        "semantic_tag": "ARDS",
+        "term": "pulmonary edema"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "infiltrates"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "opacities"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "airspace"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "aspiration"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "consolidation"
+      },
+      {
+        "semantic_tag": "Morphology",
+        "term": "pneumonia"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "bilateral"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "biapical"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "bibasal"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "bibasilar"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "widespread"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "diffuse"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "perihilar"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "parahilar"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "multifocal"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "multi-focal"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "extensive"
+      },
+      {
+        "semantic_tag": "location",
+        "term": "throughout"
+      }
+    ],
+    "excluded_legacy_surface_forms": [
+      "multi-focal"
+    ],
+    "stemming": true
+  },
+  "name": "legacy-ards-bilateral-opacity",
+  "phenotype_spec_version": "1.0.0",
+  "pipeline_order": [
+    "sentence_detection",
+    "tokenization",
+    "pos_noop",
+    "dictionary_lookup",
+    "negex_assertion",
+    "rule_postprocessing"
+  ],
+  "postprocessing": {
+    "final_semantic_tag": "ARDS",
+    "max_intervening_tokens": 5,
+    "promotion_rules": [
+      {
+        "first_semantic_tag": "location",
+        "promote_semantic_tag": "Morphology"
+      },
+      {
+        "first_semantic_tag": "Morphology",
+        "promote_semantic_tag": "location"
+      }
+    ],
+    "remove_assertions": [
+      "absent"
+    ],
+    "remove_unpromoted_semantic_tags": [
+      "location",
+      "Morphology"
+    ]
+  },
+  "schema_version": 1,
+  "sentence_detection": {
+    "abbreviation_resource": "defaultAbbrs.txt",
+    "break_long_sentences": true,
+    "max_sentence_tokens": 500,
+    "newline_ends_sentence": true
+  },
+  "tokenization": {
+    "token_rule_resource": "defaultTokenRule.txt"
+  },
+  "assertion": {
+    "cue_resource": "defaultNegexDict.txt",
+    "scope_tokens": 11
+  }
+}

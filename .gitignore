@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+/build/
+
+# Virtual envs
+.venv/
+venv/
+ENV/
+
+# uv
+.uv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/*.html
+notebooks/*_files/
+
+# OS / editors
+.DS_Store
+.vscode/
+
+# R local state
+.Rhistory
+.RData
+.Rproj.user/
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Config (keep the example, ignore the real one)
+config/config.yaml
+config/annotation_pilot.yaml
+config/annotation_planning.yaml
+config/external_comparators/*.yaml
+!config/external_comparators/*.example.yaml
+
+# Data policy
+# - Small example data can be committed.
+# - Do not commit real/raw datasets.
+# - Put fetched artifacts in data/external/ with *.source.json sidecars.
+/physionet.org/
+/YOUR_LOCAL_CLAMP_WORKSPACE_ROOT/
+/ARDS CLAMP Output.zip
+/data/ARDS CLAMP Output.zip
+/data/raw/*
+!/data/raw/.gitkeep
+
+/data/restricted/*
+
+/data/external/*
+!/data/external/.gitkeep
+
+# Derived outputs (generated)
+/data/processed/*
+!/data/processed/.gitkeep
+
+/data/derived/*
+!/data/derived/.gitkeep
+
+/artifacts/*
+!/artifacts/.gitkeep
+
+/reports/*
+!/reports/.gitkeep
+
+# Pending synthetic CLAMP fixture is generated locally until release reviews complete.
+/tests/fixtures/clamp_ards_parity/

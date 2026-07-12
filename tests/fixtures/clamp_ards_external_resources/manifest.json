@@ -1,0 +1,35 @@
+{
+  "description": "Independently authored, non-clinical resources for public unit and workflow tests.",
+  "file_sizes": {
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt": 8349,
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt": 25,
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt": 150
+  },
+  "files": {
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt": "0be9c8da24092f247a1eb1983eca6862f8e0608652d64199d683ce7e73cf611d",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt": "43467b34f9eed0099ba3d231220c46a275b97c6304153f6acafbdf7fac166b32",
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt": "958b5c8df03e5e374c7c4d0c1bebfb75e3f6f5ecf096d0ccf7b2cdfeb08dd7e6"
+  },
+  "manifest_version": 3,
+  "phenotype_spec": {
+    "attribution": "Dan Knox",
+    "license": "MIT",
+    "path": "src/ards_cxr_benchmark/clamp_ards/data/legacy_ards_phenotype_spec.json",
+    "sha256": "0b9e2b6ecdcc9dd345da0c9d2782aade7417d2dcf9c6651de3c765a24d4c2133",
+    "version": "1.0.0"
+  },
+  "project_commit": "9f8c92fbbeb44645a1066be3510d4ab993995c1e",
+  "resource_contract": {
+    "assertion_category_counts": {
+      "conjunctions": 69,
+      "negPhrases": 127,
+      "postNegPhrases": 28,
+      "pseNegPhrases": 16
+    }
+  },
+  "runtime_required_files": [
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt",
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt"
+  ]
+}

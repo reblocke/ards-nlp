@@ -1,0 +1,8 @@
+id,id2,id_accession,interpretation_text,raw_data_complete,assessment_report,adjudication_interpretation_complete,assessment_image,adjudication_image_complete
+R03-001,SYN-001,000001,,2,5,2,0,2
+R03-002,SYN-002,000002,,2,15,2,25,2
+R03-003,SYN-003,000003,,2,35,2,40,2
+R03-004,SYN-004,000004,,2,60,2,50,2
+R03-005,SYN-005,000005,,2,70,2,65,2
+R03-006,SYN-006,000006,,2,65,2,70,2
+R03-007,SYN-007,000007,,2,90,2,95,0

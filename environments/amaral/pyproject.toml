@@ -1,0 +1,19 @@
+[project]
+name = "ards-nlp-amaral-runtime"
+version = "0.0.0"
+requires-python = "==3.11.*"
+dependencies = [
+  "hyperopt==0.2.7",
+  "joblib==1.4.2",
+  "nltk==3.9.1",
+  "numpy==2.2.4",
+  "pandas==2.2.3",
+  "scikit-learn==1.6.1",
+  "scipy==1.15.2",
+  "setuptools==80.8.0",
+  "statsmodels==0.14.4",
+  "xgboost==3.0.0",
+]
+
+[tool.uv]
+package = false

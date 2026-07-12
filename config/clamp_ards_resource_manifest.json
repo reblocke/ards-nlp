@@ -1,0 +1,100 @@
+{
+  "compatible_manifest_sha256": [
+    "5f4057ea3990ad085c7d2fe38b337cd3539fb089578133e61a1477cb726dc394"
+  ],
+  "description": "Manifest v3 retains fingerprint provenance for the excluded 23-file legacy export. The Python mirror loads the authorized phenotype specification from this package and requires only the three separately licensed external resources listed in runtime_required_files.",
+  "files": {
+    ".project": "f025bd4ea4ec1918467e4c030bfa520932c91614efe1151cb873e33dcba5a7ae",
+    "Components/ARDS.pipeline": "48cc1f166c5b8518ada4da186988858a15152e864061bcdabcbf1626bd80fc96",
+    "Components/Assertion classifier/DF_NegEx_assertion/config.conf": "255c57351d382c362c1a167ceca9cfb404dfad24a8e1ecd2156051a1af6dac09",
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt": "504beb15f9ce8cf7eec5db25d275a6a6a9b8ead2dc92f0d12b1ef4fd31714239",
+    "Components/Named entity recogizer/DF_Dictionary_lookup/config.conf": "6165d4995e18a4391d377bdabf7c8e25ccbd6675640f263a88a0ba6c8444599e",
+    "Components/Named entity recogizer/DF_Dictionary_lookup/defaultDict.txt": "f8642b04c88014731f5e0224b8ccd64e1dcb8c0bee8bd66a8c964088913f7e61",
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/config.conf": "1f83bc638a23f27823b9989ef83784a2501bc04e8e9015a077748289469c4331",
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/default_pos.bin": "6bfb498a2a5314ccf3fd8f549141a162f8088d7c90b0ee27e75ad2ed07d5b757",
+    "Components/Ruta rule engine/DF_Ruta_script_file/config.conf": "a5e63135404c801ff77d32816071b8ab07fd65a75f4807745ce4bf10e14490e1",
+    "Components/Ruta rule engine/DF_Ruta_script_file/default.ruta": "b9dab7c7b6b062ceba19d94bcc7a5bf4abd83f890f8bb3494e86a40f50548e76",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/config.conf": "fe91947055a1a86279492b650dc3e4a470fb96151ae6a9e35bf94cde64712416",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt": "1577f0ec72f4302544de8f131dcf85fdde2af4ad4e44b5c1fde3f228e21a0d9e",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/sectionHeaders.txt": "8069f246e1b01f4207a4efd6b0615f7c2d0b00f8539e87b9868c604a2a080a5e",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/splitPatterns.txt": "b4271c7c7728679738097faf460dabeec39863da598a841e81fb429950e8aee7",
+    "Components/Tokenizer/DF_Clamp_tokenizer/config.conf": "36b2758c66ff805b6f3307e9a5970d8fa64a6a001dc7bd2dd5e6406a321ff59d",
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt": "cd83f8f4947b628c8a8fc1ffdea0019361c5d93220490dba10f5173e2d6a5eb0",
+    "descriptor/BasicEngine.xml": "b334187624e137ae511bd87083159225c8226d306165baac4da40cc352f96ea9",
+    "descriptor/BasicTypeSystem.xml": "cf22da46b1d6805c8719f4f2363908f44e93be5bf78380ea711b43f024ea7a8b",
+    "descriptor/ClampTypeSystem.xml": "6a615c9f4e50242110b5d19e6c6b33da74ff0775804751c4b0d14c5efdda3b10",
+    "descriptor/InternalTypeSystem.xml": "b204b8f39e3a5991432d89fe1fbb682518a683fd374d8dc6c06668028d69d04e",
+    "descriptor/defaultEngine.xml": "06f8a6a0a04cd3202edb23f479e3f23b68056daa9ac19009500fb0af36080551",
+    "descriptor/defaultTypeSystem.xml": "e32b25c22123654247333aa55ba6071e4da2f52459bb8b70019c37f5fe421434",
+    "functionality.md": "ab9720b8a0180f8c16a58e15651491309e4d5bb0d638553f291ad5f6a2c7b198"
+  },
+  "file_sizes": {
+    ".project": 424,
+    "Components/ARDS.pipeline": 518,
+    "Components/Assertion classifier/DF_NegEx_assertion/config.conf": 153,
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt": 7213,
+    "Components/Named entity recogizer/DF_Dictionary_lookup/config.conf": 219,
+    "Components/Named entity recogizer/DF_Dictionary_lookup/defaultDict.txt": 496,
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/config.conf": 153,
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/default_pos.bin": 207996,
+    "Components/Ruta rule engine/DF_Ruta_script_file/config.conf": 142,
+    "Components/Ruta rule engine/DF_Ruta_script_file/default.ruta": 1848,
+    "Components/Sentence detector/DF_Clamp_sentence_detector/config.conf": 376,
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt": 237816,
+    "Components/Sentence detector/DF_Clamp_sentence_detector/sectionHeaders.txt": 301,
+    "Components/Sentence detector/DF_Clamp_sentence_detector/splitPatterns.txt": 197,
+    "Components/Tokenizer/DF_Clamp_tokenizer/config.conf": 154,
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt": 467,
+    "descriptor/BasicEngine.xml": 9499,
+    "descriptor/BasicTypeSystem.xml": 7466,
+    "descriptor/ClampTypeSystem.xml": 154622,
+    "descriptor/InternalTypeSystem.xml": 12620,
+    "descriptor/defaultEngine.xml": 12231,
+    "descriptor/defaultTypeSystem.xml": 250,
+    "functionality.md": 20272
+  },
+  "manifest_version": 3,
+  "phenotype_spec": {
+    "attribution": "Dan Knox",
+    "license": "MIT",
+    "path": "src/ards_cxr_benchmark/clamp_ards/data/legacy_ards_phenotype_spec.json",
+    "sha256": "0b9e2b6ecdcc9dd345da0c9d2782aade7417d2dcf9c6651de3c765a24d4c2133",
+    "version": "1.0.0"
+  },
+  "project_commit": "9f8c92fbbeb44645a1066be3510d4ab993995c1e",
+  "provenance_only_files": [
+    ".project",
+    "Components/ARDS.pipeline",
+    "Components/Assertion classifier/DF_NegEx_assertion/config.conf",
+    "Components/Named entity recogizer/DF_Dictionary_lookup/config.conf",
+    "Components/Named entity recogizer/DF_Dictionary_lookup/defaultDict.txt",
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/config.conf",
+    "Components/POS tagger/DF_OpenNLP_POS_tagger/default_pos.bin",
+    "Components/Ruta rule engine/DF_Ruta_script_file/config.conf",
+    "Components/Ruta rule engine/DF_Ruta_script_file/default.ruta",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/sectionHeaders.txt",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/splitPatterns.txt",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/config.conf",
+    "Components/Tokenizer/DF_Clamp_tokenizer/config.conf",
+    "descriptor/BasicEngine.xml",
+    "descriptor/BasicTypeSystem.xml",
+    "descriptor/ClampTypeSystem.xml",
+    "descriptor/InternalTypeSystem.xml",
+    "descriptor/defaultEngine.xml",
+    "descriptor/defaultTypeSystem.xml",
+    "functionality.md"
+  ],
+  "runtime_required_files": [
+    "Components/Assertion classifier/DF_NegEx_assertion/defaultNegexDict.txt",
+    "Components/Sentence detector/DF_Clamp_sentence_detector/defaultAbbrs.txt",
+    "Components/Tokenizer/DF_Clamp_tokenizer/defaultTokenRule.txt"
+  ],
+  "resource_contract": {
+    "assertion_category_counts": {
+      "conjunctions": 69,
+      "negPhrases": 127,
+      "postNegPhrases": 28,
+      "pseNegPhrases": 16
+    }
+  }
+}

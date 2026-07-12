@@ -1,0 +1,132 @@
+---
+title: "Probabilistic Annotation Reference Standard"
+format: html
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Configuration
+
+```{python}
+from pathlib import Path
+import os
+import sys
+
+import pandas as pd
+
+root = Path.cwd()
+if root.name == "notebooks":
+    root = root.parent
+sys.path.insert(0, str(root / "src"))
+
+from ards_cxr_benchmark.annotation_reference import (
+    annotation_agreement_summary,
+    build_case_reference_standard,
+    case_level_disagreement_flags,
+    clean_rater_ratings,
+    leave_one_rater_out_agreement,
+    rater_pairwise_agreement,
+    render_annotation_summary_markdown,
+    strip_unsafe_columns,
+    validate_rating_dataframe,
+    write_rating_validation,
+)
+from ards_cxr_benchmark.config import ensure_dir, ensure_parent_dir
+
+annotation_path = Path(
+    os.environ.get(
+        "ARDS_PROB_ANNOTATIONS",
+        root / "tests" / "fixtures" / "probabilistic_annotations.csv",
+    )
+)
+synthetic_mode = "ARDS_PROB_ANNOTATIONS" not in os.environ
+annotation_output_root = root / "data" / "derived" / "annotations"
+annotation_artifact_root = root / "artifacts" / "annotations"
+if synthetic_mode:
+    annotation_output_root = annotation_output_root / "synthetic"
+    annotation_artifact_root = annotation_artifact_root / "synthetic"
+ratings_out = annotation_output_root / "validated_rater_ratings.parquet"
+reference_out = annotation_output_root / "case_reference_standard.parquet"
+artifact_dir = annotation_artifact_root
+
+annotation_path
+```
+
+## Load Completed Ratings
+
+```{python}
+ratings_raw = pd.read_parquet(annotation_path) if annotation_path.suffix == ".parquet" else pd.read_csv(annotation_path)
+strip_unsafe_columns(ratings_raw).head()
+```
+
+## Validate Schema And Ranges
+
+```{python}
+validation = validate_rating_dataframe(ratings_raw)
+validation.to_dict()
+```
+
+```{python}
+if not validation.passed:
+    raise ValueError(validation.to_dict())
+```
+
+## Build Case-Level Reference Standard
+
+```{python}
+ratings = clean_rater_ratings(ratings_raw)
+reference = build_case_reference_standard(ratings)
+reference
+```
+
+## Continuous Rater Agreement
+
+```{python}
+agreement = annotation_agreement_summary(ratings, reference)
+pairwise = rater_pairwise_agreement(ratings)
+leave_one_out = leave_one_rater_out_agreement(ratings)
+disagreement = case_level_disagreement_flags(reference)
+
+agreement
+```
+
+```{python}
+pairwise
+```
+
+```{python}
+leave_one_out
+```
+
+## Export Text-Stripped Artifacts
+
+```{python}
+ensure_dir(artifact_dir)
+ensure_parent_dir(ratings_out)
+ensure_parent_dir(reference_out)
+
+ratings.to_parquet(ratings_out, index=False)
+reference.to_parquet(reference_out, index=False)
+write_rating_validation(validation, out_json=artifact_dir / "annotation_validation_summary.json")
+agreement.to_csv(artifact_dir / "annotation_agreement_summary.csv", index=False)
+pairwise.to_csv(artifact_dir / "rater_pairwise_agreement.csv", index=False)
+disagreement.to_csv(artifact_dir / "case_level_disagreement_flags.csv", index=False)
+(artifact_dir / "annotation_agreement_summary.md").write_text(
+    render_annotation_summary_markdown(
+        validation=validation,
+        agreement_summary=agreement,
+        pairwise_agreement=pairwise,
+        leave_one_out=leave_one_out,
+    ),
+    encoding="utf-8",
+)
+
+{
+    "ratings_out": str(ratings_out),
+    "reference_out": str(reference_out),
+    "artifact_dir": str(artifact_dir),
+}
+```

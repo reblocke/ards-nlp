@@ -1,0 +1,110 @@
+---
+title: "ARDS CXR Annotation Design Scenarios"
+jupyter: python3
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  error: true
+---
+
+## Purpose
+
+This report translates the physician pilot's aggregate agreement and completion results into
+transparent annotation-design scenarios. It estimates reviewer workload and binary-validation
+precision under stated assumptions. It does not determine a sufficient model-training sample.
+
+```{python}
+from pathlib import Path
+import sys
+
+from IPython.display import Markdown, display
+
+start = Path.cwd().resolve()
+root = next(candidate for candidate in [start, *start.parents] if (candidate / "pyproject.toml").exists())
+sys.path.insert(0, str(root / "src"))
+
+from ards_cxr_benchmark.annotation_planning import (
+    default_annotation_planning_config_path,
+    load_annotation_planning_config,
+    run_annotation_planning,
+)
+
+config = load_annotation_planning_config(default_annotation_planning_config_path())
+result = run_annotation_planning(config)
+
+if result.analysis_mode == "synthetic":
+    display(Markdown("**Synthetic demonstration only. These values are not study recommendations.**"))
+```
+
+## Pilot inputs
+
+The planner reads only aggregate, text-free pilot outputs. Completion and disagreement rates are
+reported separately for image and report ratings.
+
+```{python}
+display(result.pilot_summary.reset_index(drop=True))
+display(result.image_report_alignment_summary.reset_index(drop=True))
+```
+
+## Rater reliability
+
+Required rater counts use the observed single-rater ICC(2,1) and the Spearman-Brown relationship.
+They are planning approximations and inherit the pilot ICC's uncertainty.
+
+```{python}
+display(result.reliability_requirements.reset_index(drop=True))
+```
+
+## Validation precision
+
+The grid estimates positive and negative reference denominators using expected Wilson intervals,
+then converts them to total and invited case counts using each task's assumed prevalence and
+observed all-rater case-completion rate. Individual rating completion is reported separately.
+Binary sensitivity and specificity are secondary to the project's continuous probabilistic
+evaluation.
+
+```{python}
+display(result.validation_precision_grid.reset_index(drop=True))
+```
+
+## Annotation workload
+
+Workload is shown as person-ratings for full three-rater review, single review with 20% three-rater
+overlap, and double review with a disagreement-triggered third rating. Reviewer-hours remain blank
+unless explicit minutes per image/report rating are configured.
+
+```{python}
+validation_workloads = result.workload_scenarios[
+    (result.workload_scenarios["task"] == "both")
+    & (result.workload_scenarios["planning_family"] == "validation")
+]
+retraining_examples = result.workload_scenarios[
+    (result.workload_scenarios["task"] == "both")
+    & (result.workload_scenarios["planning_family"] == "retraining_workload_example")
+]
+display(validation_workloads.reset_index(drop=True))
+display(retraining_examples.reset_index(drop=True))
+```
+
+The complete configurable workload grid is exported to `workload_scenarios.csv`.
+
+## Interpretation boundaries
+
+- Validation rows are sensitivity analyses over assumptions, not a single mandated sample size.
+- Retraining rows are workload examples only; sufficiency requires observed learning curves.
+- Pilot disagreement and completion rates may not generalize to a larger annotation phase.
+- No annotation timing is inferred from timestamps, filenames, or row order.
+
+## Output manifest
+
+All outputs are aggregate and remain in ignored repository paths. No case identifiers, accession
+numbers, report text, or rater-level rows are exported.
+
+```{python}
+display(result.output_manifest.reset_index(drop=True))
+```

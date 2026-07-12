@@ -1,0 +1,240 @@
+no change	pseNegPhrases
+not necessarily	pseNegPhrases
+not only	pseNegPhrases
+not certain	pseNegPhrases
+not always	pseNegPhrases
+not entirely	pseNegPhrases
+not significantly	pseNegPhrases
+not substantially	pseNegPhrases
+not clearly	pseNegPhrases
+not definitely	pseNegPhrases
+not consistently	pseNegPhrases
+not routinely	pseNegPhrases
+not usually	pseNegPhrases
+not generally	pseNegPhrases
+not typically	pseNegPhrases
+not conclusively	pseNegPhrases
+no	negPhrases
+not	negPhrases
+without	negPhrases
+no evidence of	negPhrases
+no evidence to suggest	negPhrases
+no new evidence of	negPhrases
+negative for	negPhrases
+free of	negPhrases
+absence of	negPhrases
+synthetic pre cue 001	negPhrases
+synthetic pre cue 002	negPhrases
+synthetic pre cue 003	negPhrases
+synthetic pre cue 004	negPhrases
+synthetic pre cue 005	negPhrases
+synthetic pre cue 006	negPhrases
+synthetic pre cue 007	negPhrases
+synthetic pre cue 008	negPhrases
+synthetic pre cue 009	negPhrases
+synthetic pre cue 010	negPhrases
+synthetic pre cue 011	negPhrases
+synthetic pre cue 012	negPhrases
+synthetic pre cue 013	negPhrases
+synthetic pre cue 014	negPhrases
+synthetic pre cue 015	negPhrases
+synthetic pre cue 016	negPhrases
+synthetic pre cue 017	negPhrases
+synthetic pre cue 018	negPhrases
+synthetic pre cue 019	negPhrases
+synthetic pre cue 020	negPhrases
+synthetic pre cue 021	negPhrases
+synthetic pre cue 022	negPhrases
+synthetic pre cue 023	negPhrases
+synthetic pre cue 024	negPhrases
+synthetic pre cue 025	negPhrases
+synthetic pre cue 026	negPhrases
+synthetic pre cue 027	negPhrases
+synthetic pre cue 028	negPhrases
+synthetic pre cue 029	negPhrases
+synthetic pre cue 030	negPhrases
+synthetic pre cue 031	negPhrases
+synthetic pre cue 032	negPhrases
+synthetic pre cue 033	negPhrases
+synthetic pre cue 034	negPhrases
+synthetic pre cue 035	negPhrases
+synthetic pre cue 036	negPhrases
+synthetic pre cue 037	negPhrases
+synthetic pre cue 038	negPhrases
+synthetic pre cue 039	negPhrases
+synthetic pre cue 040	negPhrases
+synthetic pre cue 041	negPhrases
+synthetic pre cue 042	negPhrases
+synthetic pre cue 043	negPhrases
+synthetic pre cue 044	negPhrases
+synthetic pre cue 045	negPhrases
+synthetic pre cue 046	negPhrases
+synthetic pre cue 047	negPhrases
+synthetic pre cue 048	negPhrases
+synthetic pre cue 049	negPhrases
+synthetic pre cue 050	negPhrases
+synthetic pre cue 051	negPhrases
+synthetic pre cue 052	negPhrases
+synthetic pre cue 053	negPhrases
+synthetic pre cue 054	negPhrases
+synthetic pre cue 055	negPhrases
+synthetic pre cue 056	negPhrases
+synthetic pre cue 057	negPhrases
+synthetic pre cue 058	negPhrases
+synthetic pre cue 059	negPhrases
+synthetic pre cue 060	negPhrases
+synthetic pre cue 061	negPhrases
+synthetic pre cue 062	negPhrases
+synthetic pre cue 063	negPhrases
+synthetic pre cue 064	negPhrases
+synthetic pre cue 065	negPhrases
+synthetic pre cue 066	negPhrases
+synthetic pre cue 067	negPhrases
+synthetic pre cue 068	negPhrases
+synthetic pre cue 069	negPhrases
+synthetic pre cue 070	negPhrases
+synthetic pre cue 071	negPhrases
+synthetic pre cue 072	negPhrases
+synthetic pre cue 073	negPhrases
+synthetic pre cue 074	negPhrases
+synthetic pre cue 075	negPhrases
+synthetic pre cue 076	negPhrases
+synthetic pre cue 077	negPhrases
+synthetic pre cue 078	negPhrases
+synthetic pre cue 079	negPhrases
+synthetic pre cue 080	negPhrases
+synthetic pre cue 081	negPhrases
+synthetic pre cue 082	negPhrases
+synthetic pre cue 083	negPhrases
+synthetic pre cue 084	negPhrases
+synthetic pre cue 085	negPhrases
+synthetic pre cue 086	negPhrases
+synthetic pre cue 087	negPhrases
+synthetic pre cue 088	negPhrases
+synthetic pre cue 089	negPhrases
+synthetic pre cue 090	negPhrases
+synthetic pre cue 091	negPhrases
+synthetic pre cue 092	negPhrases
+synthetic pre cue 093	negPhrases
+synthetic pre cue 094	negPhrases
+synthetic pre cue 095	negPhrases
+synthetic pre cue 096	negPhrases
+synthetic pre cue 097	negPhrases
+synthetic pre cue 098	negPhrases
+synthetic pre cue 099	negPhrases
+synthetic pre cue 100	negPhrases
+synthetic pre cue 101	negPhrases
+synthetic pre cue 102	negPhrases
+synthetic pre cue 103	negPhrases
+synthetic pre cue 104	negPhrases
+synthetic pre cue 105	negPhrases
+synthetic pre cue 106	negPhrases
+synthetic pre cue 107	negPhrases
+synthetic pre cue 108	negPhrases
+synthetic pre cue 109	negPhrases
+synthetic pre cue 110	negPhrases
+synthetic pre cue 111	negPhrases
+synthetic pre cue 112	negPhrases
+synthetic pre cue 113	negPhrases
+synthetic pre cue 114	negPhrases
+synthetic pre cue 115	negPhrases
+synthetic pre cue 116	negPhrases
+synthetic pre cue 117	negPhrases
+synthetic pre cue 118	negPhrases
+absent	postNegPhrases
+ruled out	postNegPhrases
+is ruled out	postNegPhrases
+unlikely	postNegPhrases
+not seen	postNegPhrases
+not present	postNegPhrases
+synthetic post cue 001	postNegPhrases
+synthetic post cue 002	postNegPhrases
+synthetic post cue 003	postNegPhrases
+synthetic post cue 004	postNegPhrases
+synthetic post cue 005	postNegPhrases
+synthetic post cue 006	postNegPhrases
+synthetic post cue 007	postNegPhrases
+synthetic post cue 008	postNegPhrases
+synthetic post cue 009	postNegPhrases
+synthetic post cue 010	postNegPhrases
+synthetic post cue 011	postNegPhrases
+synthetic post cue 012	postNegPhrases
+synthetic post cue 013	postNegPhrases
+synthetic post cue 014	postNegPhrases
+synthetic post cue 015	postNegPhrases
+synthetic post cue 016	postNegPhrases
+synthetic post cue 017	postNegPhrases
+synthetic post cue 018	postNegPhrases
+synthetic post cue 019	postNegPhrases
+synthetic post cue 020	postNegPhrases
+synthetic post cue 021	postNegPhrases
+synthetic post cue 022	postNegPhrases
+but	conjunctions
+however	conjunctions
+or	conjunctions
+with	conjunctions
+although	conjunctions
+yet	conjunctions
+synthetic conjunction cue 001	conjunctions
+synthetic conjunction cue 002	conjunctions
+synthetic conjunction cue 003	conjunctions
+synthetic conjunction cue 004	conjunctions
+synthetic conjunction cue 005	conjunctions
+synthetic conjunction cue 006	conjunctions
+synthetic conjunction cue 007	conjunctions
+synthetic conjunction cue 008	conjunctions
+synthetic conjunction cue 009	conjunctions
+synthetic conjunction cue 010	conjunctions
+synthetic conjunction cue 011	conjunctions
+synthetic conjunction cue 012	conjunctions
+synthetic conjunction cue 013	conjunctions
+synthetic conjunction cue 014	conjunctions
+synthetic conjunction cue 015	conjunctions
+synthetic conjunction cue 016	conjunctions
+synthetic conjunction cue 017	conjunctions
+synthetic conjunction cue 018	conjunctions
+synthetic conjunction cue 019	conjunctions
+synthetic conjunction cue 020	conjunctions
+synthetic conjunction cue 021	conjunctions
+synthetic conjunction cue 022	conjunctions
+synthetic conjunction cue 023	conjunctions
+synthetic conjunction cue 024	conjunctions
+synthetic conjunction cue 025	conjunctions
+synthetic conjunction cue 026	conjunctions
+synthetic conjunction cue 027	conjunctions
+synthetic conjunction cue 028	conjunctions
+synthetic conjunction cue 029	conjunctions
+synthetic conjunction cue 030	conjunctions
+synthetic conjunction cue 031	conjunctions
+synthetic conjunction cue 032	conjunctions
+synthetic conjunction cue 033	conjunctions
+synthetic conjunction cue 034	conjunctions
+synthetic conjunction cue 035	conjunctions
+synthetic conjunction cue 036	conjunctions
+synthetic conjunction cue 037	conjunctions
+synthetic conjunction cue 038	conjunctions
+synthetic conjunction cue 039	conjunctions
+synthetic conjunction cue 040	conjunctions
+synthetic conjunction cue 041	conjunctions
+synthetic conjunction cue 042	conjunctions
+synthetic conjunction cue 043	conjunctions
+synthetic conjunction cue 044	conjunctions
+synthetic conjunction cue 045	conjunctions
+synthetic conjunction cue 046	conjunctions
+synthetic conjunction cue 047	conjunctions
+synthetic conjunction cue 048	conjunctions
+synthetic conjunction cue 049	conjunctions
+synthetic conjunction cue 050	conjunctions
+synthetic conjunction cue 051	conjunctions
+synthetic conjunction cue 052	conjunctions
+synthetic conjunction cue 053	conjunctions
+synthetic conjunction cue 054	conjunctions
+synthetic conjunction cue 055	conjunctions
+synthetic conjunction cue 056	conjunctions
+synthetic conjunction cue 057	conjunctions
+synthetic conjunction cue 058	conjunctions
+synthetic conjunction cue 059	conjunctions
+synthetic conjunction cue 060	conjunctions
+synthetic conjunction cue 061	conjunctions
+synthetic conjunction cue 062	conjunctions
+synthetic conjunction cue 063	conjunctions

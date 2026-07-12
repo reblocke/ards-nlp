@@ -1,0 +1,103 @@
+---
+title: "Probabilistic Model Benchmark"
+format: html
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Configuration
+
+```{python}
+from pathlib import Path
+import os
+import sys
+
+import pandas as pd
+
+root = Path.cwd()
+if root.name == "notebooks":
+    root = root.parent
+sys.path.insert(0, str(root / "src"))
+
+from ards_cxr_benchmark.probabilistic_benchmark import (
+    run_probabilistic_benchmark,
+    write_probabilistic_benchmark_outputs,
+)
+
+reference_path = Path(
+    os.environ.get(
+        "ARDS_PROB_REFERENCE",
+        root / "tests" / "fixtures" / "probabilistic_case_reference.csv",
+    )
+)
+prediction_path = Path(
+    os.environ.get(
+        "ARDS_PROB_PREDICTIONS",
+        root / "tests" / "fixtures" / "probabilistic_predictions.csv",
+    )
+)
+synthetic_mode = "ARDS_PROB_REFERENCE" not in os.environ and "ARDS_PROB_PREDICTIONS" not in os.environ
+artifact_dir = root / "artifacts" / "benchmark"
+if synthetic_mode:
+    artifact_dir = artifact_dir / "synthetic"
+
+reference_path, prediction_path
+```
+
+## Load Reference And Predictions
+
+```{python}
+reference = pd.read_parquet(reference_path) if reference_path.suffix == ".parquet" else pd.read_csv(reference_path)
+predictions = pd.read_parquet(prediction_path) if prediction_path.suffix == ".parquet" else pd.read_csv(prediction_path)
+
+reference
+```
+
+```{python}
+predictions
+```
+
+## Run Benchmark
+
+```{python}
+result = run_probabilistic_benchmark(reference, predictions, n_bins=3)
+result.join_audit
+```
+
+## Primary Probabilistic Metrics
+
+```{python}
+result.metrics
+```
+
+## Secondary Expected-Count Threshold Metrics
+
+```{python}
+result.threshold_metrics.head(12)
+```
+
+## Calibration Tables
+
+```{python}
+result.calibration
+```
+
+## Optional Workflow Timing And Alert Burden
+
+```{python}
+result.workflow_timing
+```
+
+```{python}
+result.alert_burden_by_week.head()
+```
+
+## Export Benchmark Artifacts
+
+```{python}
+write_probabilistic_benchmark_outputs(result, out_dir=artifact_dir)
+artifact_dir
+```

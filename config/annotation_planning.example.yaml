@@ -1,0 +1,21 @@
+project:
+  analysis_mode: real
+  confidence_level: 0.95
+
+inputs:
+  pilot_artifact_dir: artifacts/annotations/pilot
+
+assumptions:
+  prevalence_grid: [0.10, 0.20, 0.30]
+  expected_performance_grid: [0.80, 0.90]
+  ci_half_width_grid: [0.05, 0.10]
+  reliability_targets: [0.80, 0.90]
+  overlap_fraction: 0.20
+  disagreement_threshold_points: 25
+  retraining_case_counts: [250, 500, 1000]
+  image_minutes_per_rating:
+  report_minutes_per_rating:
+
+outputs:
+  report_dir: reports/annotation_planning
+  artifact_dir: artifacts/annotations/planning

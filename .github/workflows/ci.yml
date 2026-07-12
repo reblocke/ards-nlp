@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  ARDS_CLAMP_PROJECT_DIR: tests/fixtures/clamp_ards_external_resources
+  ARDS_CLAMP_RESOURCE_MANIFEST: tests/fixtures/clamp_ards_external_resources/manifest.json
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          enable-cache: true
+
+      - name: Install verification dependencies
+        run: uv sync --locked --no-default-groups --group dev
+
+      - name: Ruff format
+        run: uv run ruff format --check .
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Generate public pending fixture
+        run: make clamp-ards-parity-fixture-prepare
+
+      - name: CLAMP Python synthetic smoke
+        run: make clamp-ards-python-smoke
+
+      - name: Public fixture contract
+        run: make clamp-ards-parity-fixture-validate
+
+      - name: Pytest
+        run: uv run pytest -q
+
+      - name: Public release audit
+        run: make release-audit
+
+  clamp-python-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          enable-cache: true
+
+      - name: Install verification dependencies
+        run: uv sync --locked --no-default-groups --group dev
+
+      - name: Generate public pending fixture
+        run: >-
+          uv run python scripts/generate_clamp_ards_parity_fixture.py generate
+          --output artifacts/restricted/clamp_ards/python/pending_fixture
+          --project-dir tests/fixtures/clamp_ards_external_resources
+          --resource-manifest tests/fixtures/clamp_ards_external_resources/manifest.json
+
+      - name: CLAMP Python compatibility tests
+        run: uv run pytest -q tests/test_clamp_ards_python.py
+
+      - name: CLAMP Python synthetic smoke
+        run: >-
+          uv run python scripts/run_python_clamp_ards.py
+          --config config/config.example.yaml
+          --fixture-root artifacts/restricted/clamp_ards/python/pending_fixture
+          --project-dir tests/fixtures/clamp_ards_external_resources
+          --resource-manifest tests/fixtures/clamp_ards_external_resources/manifest.json
+          --entity-output artifacts/restricted/clamp_ards/python/fixture_parity/smoke_entities.parquet
+          --prediction-output artifacts/restricted/clamp_ards/python/fixture_parity/smoke_predictions.parquet
+          --summary-output artifacts/restricted/clamp_ards/python/fixture_parity/smoke_summary.json
+          --no-progress
+
+      - name: Public fixture contract
+        run: >-
+          uv run python scripts/compare_clamp_ards_fixtures.py
+          --fixture-root artifacts/restricted/clamp_ards/python/pending_fixture
+          --allow-pending

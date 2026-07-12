@@ -1,0 +1,4 @@
+case_id,mean_report_probability,mean_image_probability,annotation_phase
+case_a,0.70,0.80,pilot
+case_b,0.25,0.15,pilot
+case_c,0.70,0.5666666667,pilot

@@ -1,0 +1,10 @@
+{
+  "archive_basename": "ARDS_CLAMP_Output_full.zip",
+  "archive_bytes": 1812074464,
+  "archive_sha256": "753ad353a2ab043124348194dfdd0c0dd5328860be28c6566c8a5e8ef1292cf8",
+  "document_count": 227835,
+  "provenance": "User-provided returned ARDS CLAMP output received 2026-07-11; original CLAMP build, OS, Java version, export settings, and repeated-run determinism were not supplied and remain VERIFY items.",
+  "restricted": true,
+  "txt_member_count": 227835,
+  "xmi_member_count": 227835
+}
