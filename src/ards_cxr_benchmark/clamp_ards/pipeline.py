@@ -10,6 +10,7 @@ from .pos import ClampPosNoOp
 from .resources import ClampResources, load_clamp_resources
 from .ruta import ClampRutaPostprocessor
 from .segmentation import ClampSentenceSegmenter
+from .span_index import DocumentSpanIndex
 from .stemming import PorterCompatibilityStemmer
 from .tokenization import ClampTokenizer, Utf16OffsetMap
 from .types import EntitySpan, SentenceSpan, TokenSpan
@@ -79,12 +80,19 @@ class LegacyARDSClampMirror:
         tokens = self.tokenizer.tokenize(text)
         sentences = self.segmenter.segment(text, tokens)
         pos_tokens = self.pos.apply(tokens)
-        dictionary_entities = self.dictionary.match(text, pos_tokens, sentences)
+        span_index = DocumentSpanIndex.build(pos_tokens, sentences)
+        dictionary_entities = self.dictionary.match(
+            text,
+            pos_tokens,
+            sentences,
+            span_index=span_index,
+        )
         asserted_entities = self.assertion.classify(
             text,
             sentences,
             pos_tokens,
             dictionary_entities,
+            span_index=span_index,
         )
         final_entities = self.ruta.apply(sentences, pos_tokens, asserted_entities)
         return PipelineTrace(
