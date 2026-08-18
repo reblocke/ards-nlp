@@ -35,6 +35,7 @@ help:
 	@echo "  clamp-ards-teacher-benchmark Benchmark CLAMP teacher outputs against silver labels"
 	@echo "  clamp-ards-python Run the deterministic Python CLAMP compatibility port"
 	@echo "  clamp-ards-python-smoke Run the Python port on tracked synthetic inputs"
+	@echo "  clamp-ards-matcher-benchmark Benchmark optimized CLAMP matcher exactness and speed"
 	@echo "  clamp-ards-characterize Stream a 5,000-document XMI characterization sample"
 	@echo "  clamp-ards-parity-restricted Strictly compare Python output with local CLAMP oracle"
 	@echo "  clamp-ards-parity-fixtures Strictly compare completed CLAMP-generated fixtures"
@@ -215,6 +216,8 @@ CLAMP_ARDS_GOLDEN_FIXTURE_ROOT ?= tests/fixtures/clamp_ards_parity
 CLAMP_ARDS_PENDING_ROOT = $(if $(CLAMP_ARDS_FIXTURE_ROOT),$(CLAMP_ARDS_FIXTURE_ROOT),$(CLAMP_ARDS_PENDING_FIXTURE_ROOT))
 CLAMP_ARDS_STRICT_ROOT = $(if $(CLAMP_ARDS_FIXTURE_ROOT),$(CLAMP_ARDS_FIXTURE_ROOT),$(CLAMP_ARDS_GOLDEN_FIXTURE_ROOT))
 CLAMP_ARDS_FIXTURE_ARTIFACT_DIR ?= artifacts/restricted/clamp_ards/python/fixture_parity
+CLAMP_ARDS_MATCHER_BENCHMARK_OUTPUT ?= artifacts/benchmark/clamp_ards_matcher/benchmark.json
+CLAMP_ARDS_MATCHER_BENCHMARK_ARGS ?=
 CLAMP_ARDS_HANDOFF_DIR ?= artifacts/restricted/clamp_ards/parity_handoff
 CLAMP_ARDS_RUN_1 ?=
 CLAMP_ARDS_RUN_2 ?=
@@ -236,6 +239,14 @@ clamp-ards-python-smoke:
 		--prediction-output "$(CLAMP_ARDS_FIXTURE_ARTIFACT_DIR)/smoke_predictions.parquet" \
 		--summary-output "$(CLAMP_ARDS_FIXTURE_ARTIFACT_DIR)/smoke_summary.json" \
 		--no-progress
+
+.PHONY: clamp-ards-matcher-benchmark
+clamp-ards-matcher-benchmark:
+	uv run python scripts/benchmark_clamp_ards_matcher.py \
+		--project-dir "$(CLAMP_ARDS_PUBLIC_RESOURCE_DIR)" \
+		--resource-manifest "$(CLAMP_ARDS_PUBLIC_RESOURCE_MANIFEST)" \
+		--output "$(CLAMP_ARDS_MATCHER_BENCHMARK_OUTPUT)" \
+		$(CLAMP_ARDS_MATCHER_BENCHMARK_ARGS)
 
 .PHONY: clamp-ards-characterize
 clamp-ards-characterize:

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 from .resources import AssertionCue
+from .span_index import DocumentSpanIndex
 from .types import EntitySpan, SentenceSpan, TokenSpan
 
 
@@ -21,6 +24,14 @@ class _CompiledCue:
     token_values: tuple[str, ...]
 
 
+@dataclass(frozen=True)
+class _SentenceCues:
+    negations: tuple[CueSpan, ...]
+    post_negations: tuple[CueSpan, ...]
+    pseudo_negations: tuple[CueSpan, ...]
+    conjunctions: tuple[CueSpan, ...]
+
+
 class ClampNegExAssertion:
     """Empirical NegEx compatibility layer using the supplied CLAMP cue inventory."""
 
@@ -34,6 +45,12 @@ class ClampNegExAssertion:
         self._tokenizer = tokenizer
         self._scope_tokens = scope_tokens
         self._compiled = tuple(self._compile(cue) for cue in cues)
+        buckets: dict[str, list[_CompiledCue]] = {}
+        for compiled in self._compiled:
+            buckets.setdefault(compiled.token_values[0], []).append(compiled)
+        self._cues_by_first_token: Mapping[str, tuple[_CompiledCue, ...]] = MappingProxyType(
+            {value: tuple(bucket) for value, bucket in buckets.items()}
+        )
 
     def classify(
         self,
@@ -41,30 +58,29 @@ class ClampNegExAssertion:
         sentences: list[SentenceSpan],
         tokens: list[TokenSpan],
         entities: list[EntitySpan],
+        *,
+        span_index: DocumentSpanIndex | None = None,
     ) -> list[EntitySpan]:
+        document_spans = span_index or DocumentSpanIndex.build(tokens, sentences)
         cues = self.find_cues(text, tokens)
+        cues_by_sentence = self._partition_cues(cues, len(sentences), document_spans)
         result: list[EntitySpan] = []
         for entity in entities:
-            sentence = next(
-                (
-                    span
-                    for span in sentences
-                    if entity.start >= span.start and entity.end <= span.end
-                ),
-                None,
-            )
-            if sentence is None:
+            sentence_index = document_spans.sentence_for_span(entity.start, entity.end)
+            if sentence_index is None:
                 result.append(entity)
                 continue
-            sentence_tokens = [
-                token
-                for token in tokens
-                if token.start >= sentence.start and token.end <= sentence.end
-            ]
-            sentence_cues = [
-                cue for cue in cues if cue.start >= sentence.start and cue.end <= sentence.end
-            ]
-            cue = self._negating_cue(text, entity, sentence_tokens, sentence_cues)
+            first_token, stop_token = document_spans.sentence_token_bounds[sentence_index]
+            sentence_token_start = (
+                document_spans.token_starts[first_token] if first_token < stop_token else 0
+            )
+            cue = self._negating_cue(
+                text,
+                entity,
+                document_spans,
+                cues_by_sentence[sentence_index],
+                sentence_token_start,
+            )
             result.append(
                 entity.with_assertion("absent", cue.phrase)
                 if cue is not None
@@ -75,14 +91,17 @@ class ClampNegExAssertion:
     def find_cues(self, text: str, tokens: list[TokenSpan]) -> list[CueSpan]:
         values = [token.covered_text(text).casefold() for token in tokens]
         matches: list[CueSpan] = []
-        for start_index in range(len(tokens)):
-            for compiled in self._compiled:
+        for start_index, token_value in enumerate(values):
+            for compiled in self._cues_by_first_token.get(token_value, ()):
                 length = len(compiled.token_values)
-                if tuple(values[start_index : start_index + length]) != compiled.token_values:
+                stop_index = start_index + length
+                if stop_index > len(tokens) or not self._matches_at(
+                    values,
+                    start_index,
+                    compiled.token_values,
+                ):
                     continue
-                end_index = start_index + length - 1
-                if end_index >= len(tokens):
-                    continue
+                end_index = stop_index - 1
                 matches.append(
                     CueSpan(
                         start=tokens[start_index].start,
@@ -102,33 +121,49 @@ class ClampNegExAssertion:
         self,
         text: str,
         entity: EntitySpan,
-        tokens: list[TokenSpan],
-        cues: list[CueSpan],
+        span_index: DocumentSpanIndex,
+        cues: _SentenceCues,
+        sentence_start: int,
     ) -> CueSpan | None:
-        conjunctions = [cue for cue in cues if cue.category == "conjunctions"]
-        pre = [
-            cue
-            for cue in cues
-            if cue.category == "negPhrases"
-            and cue.end <= entity.start
-            and self._gap(cue.end, entity.start, tokens) <= self._scope_tokens
-            and not self._terminated(cue.end, entity.start, conjunctions)
-            and not self._blocked_by_pseudo(text, cue, entity, cues, tokens)
-        ]
-        if pre:
-            return max(pre, key=lambda cue: (cue.end, cue.start, -cue.index))
+        selected: CueSpan | None = None
+        for cue in cues.negations:
+            if cue.end > entity.start:
+                continue
+            if span_index.token_gap(cue.end, entity.start) > self._scope_tokens:
+                continue
+            if self._terminated(cue.end, entity.start, cues.conjunctions):
+                continue
+            if self._blocked_by_pseudo(
+                text,
+                cue,
+                entity,
+                cues.pseudo_negations,
+                sentence_start,
+            ):
+                continue
+            if selected is None or (cue.end, cue.start, -cue.index) > (
+                selected.end,
+                selected.start,
+                -selected.index,
+            ):
+                selected = cue
+        if selected is not None:
+            return selected
 
-        post = [
-            cue
-            for cue in cues
-            if cue.category == "postNegPhrases"
-            and cue.start >= entity.end
-            and self._gap(entity.end, cue.start, tokens) <= self._scope_tokens
-            and not self._terminated(entity.end, cue.start, conjunctions)
-        ]
-        if post:
-            return min(post, key=lambda cue: (cue.start, cue.end, cue.index))
-        return None
+        for cue in cues.post_negations:
+            if cue.start < entity.end:
+                continue
+            if span_index.token_gap(entity.end, cue.start) > self._scope_tokens:
+                continue
+            if self._terminated(entity.end, cue.start, cues.conjunctions):
+                continue
+            if selected is None or (cue.start, cue.end, cue.index) < (
+                selected.start,
+                selected.end,
+                selected.index,
+            ):
+                selected = cue
+        return selected
 
     @classmethod
     def _blocked_by_pseudo(
@@ -136,13 +171,10 @@ class ClampNegExAssertion:
         text: str,
         negation: CueSpan,
         entity: EntitySpan,
-        cues: list[CueSpan],
-        tokens: list[TokenSpan],
+        pseudo_negations: tuple[CueSpan, ...],
+        sentence_start: int,
     ) -> bool:
-        sentence_start = tokens[0].start if tokens else 0
-        for pseudo in cues:
-            if pseudo.category != "pseNegPhrases":
-                continue
+        for pseudo in pseudo_negations:
             # The restricted oracle honors ``not necessarily``/``not only`` consistently. Its
             # ``no change`` family is implementation-dependent: an overlapping ``no`` still fires
             # when the pseudo cue begins the CLAMP sentence, but is suppressed after lexical
@@ -162,11 +194,45 @@ class ClampNegExAssertion:
         return _CompiledCue(cue=cue, token_values=values)
 
     @staticmethod
-    def _gap(left_end: int, right_start: int, tokens: list[TokenSpan]) -> int:
-        return sum(token.start >= left_end and token.end <= right_start for token in tokens)
+    def _matches_at(values: list[str], start: int, pattern: tuple[str, ...]) -> bool:
+        for offset in range(1, len(pattern)):
+            if values[start + offset] != pattern[offset]:
+                return False
+        return True
 
     @staticmethod
-    def _terminated(start: int, end: int, conjunctions: list[CueSpan]) -> bool:
+    def _partition_cues(
+        cues: list[CueSpan],
+        sentence_count: int,
+        span_index: DocumentSpanIndex,
+    ) -> tuple[_SentenceCues, ...]:
+        negations: list[list[CueSpan]] = [[] for _ in range(sentence_count)]
+        post_negations: list[list[CueSpan]] = [[] for _ in range(sentence_count)]
+        pseudo_negations: list[list[CueSpan]] = [[] for _ in range(sentence_count)]
+        conjunctions: list[list[CueSpan]] = [[] for _ in range(sentence_count)]
+        category_lists = {
+            "negPhrases": negations,
+            "postNegPhrases": post_negations,
+            "pseNegPhrases": pseudo_negations,
+            "conjunctions": conjunctions,
+        }
+        for cue in cues:
+            sentence_index = span_index.sentence_for_span(cue.start, cue.end)
+            target = category_lists.get(cue.category)
+            if sentence_index is not None and target is not None:
+                target[sentence_index].append(cue)
+        return tuple(
+            _SentenceCues(
+                negations=tuple(negations[index]),
+                post_negations=tuple(post_negations[index]),
+                pseudo_negations=tuple(pseudo_negations[index]),
+                conjunctions=tuple(conjunctions[index]),
+            )
+            for index in range(sentence_count)
+        )
+
+    @staticmethod
+    def _terminated(start: int, end: int, conjunctions: tuple[CueSpan, ...]) -> bool:
         return any(cue.start >= start and cue.end <= end for cue in conjunctions)
 
     @staticmethod

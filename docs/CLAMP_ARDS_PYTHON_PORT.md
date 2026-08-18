@@ -53,6 +53,77 @@ The final entity span is the second dictionary annotation relabeled to `ARDS`; n
 created. Duplicate annotations remain a multiset and receive a zero-based `duplicate_occurrence`
 only when written to Parquet.
 
+### Matcher performance contract
+
+Dictionary rows and assertion cues are compiled once into private immutable candidate buckets keyed
+by their first normalized token. Dictionary keys use the same Porter-compatible normalization as
+matching; cue keys use the same case folding as the legacy scan. Values within every bucket retain
+the original resource order. Each report token is normalized once, and a position is compared only
+with patterns that can begin at that token. Overlapping matches, shorter cues inside longer cues,
+duplicate annotations, end-of-input behavior, and the final `(start, end, resource index)` ordering
+remain unchanged.
+
+Sentence token bounds and cue membership are also computed once per report so assertion
+classification does not rescan every sentence, token, and cue for every entity. These indexes are
+internal implementation details: the batch interface, Parquet schemas, UTF-16 export conversion,
+resource hashes, and public entity types are unchanged. The pre-index loops remain available only
+as test and benchmark reference oracles; production callers cannot select them.
+
+The public performance harness uses deterministic generated nonclinical text and writes only
+machine-readable aggregate results under ignored `artifacts/`. It measures isolated tokenization,
+segmentation, optimized-only span-index construction, dictionary, cue, assertion, postprocessing,
+UTF-16, and serialization work as well as the complete mirror. The naive reference has no
+span-index stage. Corpus generation happens outside timed regions. Warmups precede repeated
+measurements; the JSON records every observation, median and dispersion, documents/second,
+tokens/second, construction-inclusive peak traced memory, seed, corpus/token distribution,
+Python/dependency/platform metadata, commit state, and a deterministic source-tree fingerprint
+covering the HEAD tree, scoped tracked diff, and execution-relevant untracked source bytes. Run it
+with a fixed seed so pre-index and indexed implementations see identical bytes:
+
+```bash
+uv run python scripts/benchmark_clamp_ards_matcher.py --seed 20260811
+```
+
+Reference-versus-indexed output equality is a hard prerequisite for reporting a speedup. The public
+acceptance targets are at least 3x faster isolated cue matching and at least 2x faster end to end on
+the representative multi-thousand-document corpus. Both are hard recorded-acceptance gates; a
+different stage becoming dominant does not waive the end-to-end target. Peak traced memory must not
+increase by more than the larger of 10% or 5 MiB. Timing ratios are recorded on the same machine and
+locked environment; they are not enforced on variable hosted-CI hardware. A public benchmark or
+synthetic reference comparison is not a substitute for fresh restricted full-corpus parity.
+
+#### Public benchmark result (2026-08-17)
+
+The canonical command passed on CPython 3.11.11, arm64 macOS, from the indexed working tree based
+on `b197d4f14a5880158625994a86bd6d0fb3e2af41`; source fingerprint
+`3078d8b19be51a3dfb77f92d01d52838cdb70590139026738064ba025e27b8ed` binds its exact dirty
+execution tree. The generated corpus contained 5,000 documents and 525,378 tokens (median 105 per
+document); its SHA-256 was
+`4ca0e9eb7e9c70d21541ce49e82190b217a501d7ca2a4ba88fa7c450d23f2b6e`. It exercised every active
+dictionary term and all 240 cues, including true negation-conjunction-entity scope termination.
+The naive reference was constructed without transient indexed matcher allocations. Exact
+dictionary, cue, assertion, and full-mirror equality passed on the bounded reference sample before
+timing.
+
+| Stage | Naive median | Indexed median | Result |
+|---|---:|---:|---:|
+| Dictionary matching | 2.424 s | 1.788 s | 1.36x faster |
+| Cue matching | 7.232 s | 0.106 s | 67.97x faster |
+| Assertion classification with cues and span index precomputed | 0.017 s | 0.024 s | 0.71x |
+| Full mirror | 10.765 s | 2.653 s | 4.06x faster |
+
+The indexed full mirror processed 1,885 documents/second and 198,021 tokens/second. Indexed stage
+medians were 0.280 s for tokenization, 0.187 s for sentence segmentation, 0.072 s for span-index
+construction, 0.045 s for postprocessing, 0.085 s for UTF-16 conversion, and 0.007 s for in-memory
+batch serialization. The profile confirms that exhaustive cue matching was the original bottleneck.
+Traced peak memory from fresh matcher construction through the complete corpus increased from
+156,088 bytes to 705,935 bytes, below the allowed 5,398,968 bytes. The complete raw repeats, IQRs,
+environment, resource hashes, source fingerprint, and acceptance flags are in the ignored
+`artifacts/benchmark/clamp_ards_matcher/benchmark.json`.
+
+Concurrency was not added: first-token and span indexing exceeded both hard throughput targets.
+Batch processing therefore retains its existing serial, ordered, atomic writer behavior.
+
 Intermediate compatibility is deliberately not claimed before the licensed synthetic runs. The
 restricted XMI contains no occurrence of the configured `&apos;s` no-split string, so its standalone
 and attached token behavior remains unresolved. The 463-case packet also contains isolated
@@ -103,6 +174,12 @@ that convention. The prediction table contains only the document ID, evaluabilit
 label, entity count, and source-text SHA-256.
 
 ## Strict parity
+
+The indexed `v0.3.0` working tree completed two fresh full-corpus runs on 2026-08-12. Each passed
+exact entity, document, multiplicity, field, hash, and raw-order comparison against the legacy
+oracle, and the two ordered entity and prediction Parquets were byte-identical. Aggregate results
+and hashes are recorded in `docs/CLAMP_ARDS_PYTHON_PARITY.md`; row-level summaries remain ignored
+and restricted. The separate genuinely completed public fixture and named-review gate is pending.
 
 Run the full local comparison with:
 
@@ -165,10 +242,11 @@ non-obvious compatibility rules without document-ID exceptions: pseudo-negation 
 on lexical context before the cue, and the configured hyphenated `multi-focal` dictionary row is
 inert in all 27 corpus occurrences.
 
-Under the fingerprinted restricted resource set, the final full-corpus run passed with
-227,835/227,835 exact entity-multiset documents, 80,908/80,908 entities, and zero required or
-output-order differences. Independent reproduction requires separately licensed resources. The
-generated restricted summary remains local; the identifier-free aggregate result is in
+Under the fingerprinted restricted resource set, both the historical `v0.2.0` run and the fresh
+indexed `v0.3.0` two-run validation passed with 227,835/227,835 exact entity-multiset documents,
+80,908/80,908 entities, and zero required or output-order differences. Independent reproduction
+requires separately licensed resources. Generated restricted summaries remain local; the
+identifier-free aggregates, determinism hashes, and remaining public-fixture gate are in
 `docs/CLAMP_ARDS_PYTHON_PARITY.md`.
 
 ## Governance boundary
