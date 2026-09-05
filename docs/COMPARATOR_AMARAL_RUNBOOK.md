@@ -19,6 +19,11 @@ The isolated runtime pins setuptools 80.10.2 (`<81`) because Hyperopt 0.2.7 requ
 publishes an sdist nor relies on `MANIFEST.in` exclusions, so the packaging-only advisory fixed in
 setuptools 83 does not apply to it.
 
+NLTK 3.10.3 remains affected by `GHSA-8mgp-746c-j5xp` because no patched release is available. The
+comparator uses only `word_tokenize` with a dedicated, operator-controlled `NLTK_DATA` directory
+and never calls the affected model-artifact read/write APIs. Keep the advisory open and reassess
+when upstream publishes a fix.
+
 ## Commands
 
 ```bash
