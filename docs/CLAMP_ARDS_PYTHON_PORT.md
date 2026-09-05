@@ -84,41 +84,43 @@ with a fixed seed so pre-index and indexed implementations see identical bytes:
 uv run python scripts/benchmark_clamp_ards_matcher.py --seed 20260811
 ```
 
-Reference-versus-indexed output equality is a hard prerequisite for reporting a speedup. The public
-acceptance targets are at least 3x faster isolated cue matching and at least 2x faster end to end on
-the representative multi-thousand-document corpus. Both are hard recorded-acceptance gates; a
-different stage becoming dominant does not waive the end-to-end target. Peak traced memory must not
-increase by more than the larger of 10% or 5 MiB. Timing ratios are recorded on the same machine and
-locked environment; they are not enforced on variable hosted-CI hardware. A public benchmark or
-synthetic reference comparison is not a substitute for fresh restricted full-corpus parity.
+Reference-versus-indexed output equality over the complete generated corpus is a hard prerequisite
+for reporting a speedup. The default checks every generated document before timing. An explicit
+smaller `--parity-documents` value remains available for developer diagnostics: it exits zero but
+records `diagnostic_only` and cannot receive acceptance. The public acceptance targets are at least
+3x faster isolated cue matching and at least 2x faster end to end on the representative
+multi-thousand-document corpus. Both are hard recorded-acceptance gates; a different stage becoming
+dominant does not waive the end-to-end target. Peak traced memory must not increase by more than the
+larger of 10% or 5 MiB. Timing ratios are recorded on the same machine and locked environment; they
+are not enforced on variable hosted-CI hardware. A public benchmark or synthetic reference
+comparison is not a substitute for fresh restricted full-corpus parity.
 
-#### Public benchmark result (2026-08-17)
+#### Public benchmark result (2026-08-21)
 
 The canonical command passed on CPython 3.11.11, arm64 macOS, from the indexed working tree based
 on `b197d4f14a5880158625994a86bd6d0fb3e2af41`; source fingerprint
-`3078d8b19be51a3dfb77f92d01d52838cdb70590139026738064ba025e27b8ed` binds its exact dirty
+`278399036caceeaaf7b6448b9898e649a797f0215cdc948b1521180b69f3d8ac` binds its exact dirty
 execution tree. The generated corpus contained 5,000 documents and 525,378 tokens (median 105 per
 document); its SHA-256 was
 `4ca0e9eb7e9c70d21541ce49e82190b217a501d7ca2a4ba88fa7c450d23f2b6e`. It exercised every active
 dictionary term and all 240 cues, including true negation-conjunction-entity scope termination.
 The naive reference was constructed without transient indexed matcher allocations. Exact
-dictionary, cue, assertion, and full-mirror equality passed on the bounded reference sample before
-timing.
+dictionary, cue, assertion, and full-mirror equality passed for all 5,000 documents before timing.
 
 | Stage | Naive median | Indexed median | Result |
 |---|---:|---:|---:|
-| Dictionary matching | 2.424 s | 1.788 s | 1.36x faster |
-| Cue matching | 7.232 s | 0.106 s | 67.97x faster |
-| Assertion classification with cues and span index precomputed | 0.017 s | 0.024 s | 0.71x |
-| Full mirror | 10.765 s | 2.653 s | 4.06x faster |
+| Dictionary matching | 2.311 s | 1.714 s | 1.35x faster |
+| Cue matching | 6.907 s | 0.105 s | 65.53x faster |
+| Assertion classification with cues and span index precomputed | 0.016 s | 0.024 s | 0.69x |
+| Full mirror | 9.853 s | 2.532 s | 3.89x faster |
 
-The indexed full mirror processed 1,885 documents/second and 198,021 tokens/second. Indexed stage
-medians were 0.280 s for tokenization, 0.187 s for sentence segmentation, 0.072 s for span-index
-construction, 0.045 s for postprocessing, 0.085 s for UTF-16 conversion, and 0.007 s for in-memory
+The indexed full mirror processed 1,974 documents/second and 207,465 tokens/second. Indexed stage
+medians were 0.276 s for tokenization, 0.177 s for sentence segmentation, 0.068 s for span-index
+construction, 0.044 s for postprocessing, 0.083 s for UTF-16 conversion, and 0.006 s for in-memory
 batch serialization. The profile confirms that exhaustive cue matching was the original bottleneck.
 Traced peak memory from fresh matcher construction through the complete corpus increased from
-156,088 bytes to 705,935 bytes, below the allowed 5,398,968 bytes. The complete raw repeats, IQRs,
-environment, resource hashes, source fingerprint, and acceptance flags are in the ignored
+147,013 bytes to 697,300 bytes, below the allowed 5,389,893 bytes. The complete raw repeats, IQRs,
+environment, resource hashes, source fingerprint, and schema-v2 acceptance flags are in the ignored
 `artifacts/benchmark/clamp_ards_matcher/benchmark.json`.
 
 Concurrency was not added: first-token and span indexing exceeded both hard throughput targets.
@@ -175,7 +177,7 @@ label, entity count, and source-text SHA-256.
 
 ## Strict parity
 
-The indexed `v0.3.0` working tree completed two fresh full-corpus runs on 2026-08-12. Each passed
+The indexed `v0.3.0` working tree completed two fresh full-corpus runs on 2026-08-21. Each passed
 exact entity, document, multiplicity, field, hash, and raw-order comparison against the legacy
 oracle, and the two ordered entity and prediction Parquets were byte-identical. Aggregate results
 and hashes are recorded in `docs/CLAMP_ARDS_PYTHON_PARITY.md`; row-level summaries remain ignored
