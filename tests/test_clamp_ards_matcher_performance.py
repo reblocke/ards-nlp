@@ -681,8 +681,6 @@ def test_benchmark_cli_writes_machine_readable_parity_and_performance_data(
             "2",
             "--warmups",
             "0",
-            "--parity-documents",
-            "44",
             "--output",
             str(output),
         ],
@@ -694,11 +692,17 @@ def test_benchmark_cli_writes_machine_readable_parity_and_performance_data(
     # Tiny timings may miss a target; the CLI must still persist a complete, honest result.
     assert process.returncode in {0, 2}, process.stderr
     payload = json.loads(output.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == 1
+    assert payload["schema_version"] == 2
     assert payload["status"] in {"ok", "performance_failure"}
     assert payload["parity"]["passed"] is True
+    assert payload["parity"]["documents_checked"] == 44
+    assert payload["parity"]["documents_available"] == 44
+    assert payload["parity"]["full_corpus"] is True
     assert payload["benchmark"]["repeats"] == 2
     assert payload["benchmark"]["warmups"] == 0
+    assert payload["benchmark"]["parity_documents"] == 44
+    assert payload["benchmark"]["parity_documents_requested"] is None
+    assert payload["benchmark"]["parity_mode"] == "full"
     assert payload["benchmark"]["clock"] == "time.perf_counter"
     assert payload["benchmark"]["dispersion"] == "interquartile_range"
     assert payload["benchmark"]["profile_stage_scope"] == {
@@ -930,3 +934,72 @@ def test_benchmark_cli_writes_machine_readable_parity_and_performance_data(
         )
         else "performance_failure"
     )
+    acceptance = payload["acceptance"]
+    performance_gates_met = all(
+        payload["comparisons"][name]["target_met"]
+        for name in ("cue_matching", "full_mirror", "full_mirror_memory")
+    )
+    assert acceptance == {
+        "eligible": True,
+        "parity_gate_met": True,
+        "performance_gates_met": performance_gates_met,
+        "passed": performance_gates_met,
+        "reason": None if performance_gates_met else "performance_targets_not_met",
+    }
+
+
+def test_benchmark_cli_marks_partial_parity_as_diagnostic_only(tmp_path: Path) -> None:
+    output = tmp_path / "partial-benchmark.json"
+    process = subprocess.run(
+        [
+            sys.executable,
+            "scripts/benchmark_clamp_ards_matcher.py",
+            "--documents",
+            "8",
+            "--tokens-per-document",
+            "16",
+            "--repeats",
+            "1",
+            "--warmups",
+            "0",
+            "--parity-documents",
+            "3",
+            "--output",
+            str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert process.returncode == 0, process.stderr
+    assert "diagnostic-only" in process.stderr
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == 2
+    assert payload["status"] == "diagnostic_only"
+    assert payload["benchmark"]["parity_documents"] == 3
+    assert payload["benchmark"]["parity_documents_requested"] == 3
+    assert payload["benchmark"]["parity_mode"] == "partial_diagnostic"
+    assert payload["parity"] == {
+        "passed": True,
+        "documents_checked": 3,
+        "documents_available": 8,
+        "full_corpus": False,
+        "checks": {
+            "dictionary_matches": 3,
+            "cue_matches": 3,
+            "assertion_results": 3,
+            "full_mirror_outputs": 3,
+        },
+    }
+    performance_gates_met = all(
+        payload["comparisons"][name]["target_met"]
+        for name in ("cue_matching", "full_mirror", "full_mirror_memory")
+    )
+    assert payload["acceptance"] == {
+        "eligible": False,
+        "parity_gate_met": False,
+        "performance_gates_met": performance_gates_met,
+        "passed": False,
+        "reason": "partial_parity_check",
+    }

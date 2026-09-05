@@ -9,7 +9,7 @@ separately licensed resources; the public synthetic oracle is still pending.
 
 ### Indexed-matcher result
 
-On 2026-08-17, the indexed `v0.3.0` working tree based on
+On 2026-08-21, the indexed `v0.3.0` working tree based on
 `b197d4f14a5880158625994a86bd6d0fb3e2af41` ran the complete restricted corpus twice. Both runs
 passed the frozen legacy oracle with `--require-order`, and their ordered outputs were byte-identical:
 
@@ -23,12 +23,12 @@ passed the frozen legacy oracle with `--require-order`, and their ordered output
 The input packet SHA-256 remained
 `531af96dda7cead0cb5b4ae2c721995ca68de2c0b437cc2452c4bc96bac1e7c5`; resource hashes and the
 phenotype hash validated against their frozen manifests. The exact dirty execution tree is bound by
-source fingerprint `3078d8b19be51a3dfb77f92d01d52838cdb70590139026738064ba025e27b8ed`:
+source fingerprint `278399036caceeaaf7b6448b9898e649a797f0215cdc948b1521180b69f3d8ac`:
 the fingerprint covers the base tree, scoped binary tracked diff, and execution-relevant untracked
-source bytes. The reference-only memory-baseline correction did not alter production behavior, but
-this fresh pair recertifies the shared provenance. It is persisted with the restricted batch,
-parity, determinism, and ordered-file hashes in ignored
-`artifacts/restricted/clamp_ards/python/indexed_validation_memory_baseline/indexed_validation_provenance.json`.
+source bytes. The full-generated-corpus benchmark parity gate and its acceptance metadata do not
+alter production behavior, but this fresh pair recertifies the shared provenance. It is persisted
+with the restricted batch, parity, determinism, and ordered-file hashes in ignored
+`artifacts/restricted/clamp_ards/python/indexed_validation_full_benchmark_parity/indexed_validation_provenance.json`.
 
 This renews restricted-corpus compatibility acceptance for the indexed implementation. Public
 fixture maturity remains separately pending until the genuine licensed synthetic runs and named
