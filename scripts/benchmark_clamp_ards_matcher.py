@@ -45,7 +45,6 @@ DEFAULT_TOKENS_PER_DOCUMENT = 100
 DEFAULT_SEED = 20_260_811
 DEFAULT_REPEATS = 5
 DEFAULT_WARMUPS = 2
-DEFAULT_PARITY_DOCUMENTS = 256
 REFERENCE_BASE_COMMIT = "b197d4f14a5880158625994a86bd6d0fb3e2af41"
 _SOURCE_FINGERPRINT_PATHS = (
     "Makefile",
@@ -153,8 +152,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--parity-documents",
         type=int,
-        default=DEFAULT_PARITY_DOCUMENTS,
-        help="Number of generated documents checked against the naive oracle before timing",
+        default=None,
+        help=(
+            "Number of generated documents checked against the naive oracle before timing; "
+            "defaults to all documents, while an explicit smaller value is diagnostic-only"
+        ),
     )
     parser.add_argument("--project-dir", type=Path, default=DEFAULT_PROJECT_DIR)
     parser.add_argument("--resource-manifest", type=Path, default=DEFAULT_RESOURCE_MANIFEST)
@@ -179,6 +181,12 @@ def main() -> int:
         seed=args.seed,
     )
     prepared = _prepare_documents(optimized, documents)
+    parity_document_count = (
+        len(prepared)
+        if args.parity_documents is None
+        else min(args.parity_documents, len(prepared))
+    )
+    full_parity_coverage = parity_document_count == len(prepared)
     fixture = _fixture_metadata(
         prepared,
         args.tokens_per_document,
@@ -187,14 +195,16 @@ def main() -> int:
     )
     environment = _environment_metadata(resources)
     base_payload: dict[str, object] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "benchmark": {
             "document_count": args.documents,
             "approximate_tokens_per_document": args.tokens_per_document,
             "seed": args.seed,
             "repeats": args.repeats,
             "warmups": args.warmups,
-            "parity_documents": min(args.parity_documents, args.documents),
+            "parity_documents": parity_document_count,
+            "parity_documents_requested": args.parity_documents,
+            "parity_mode": "full" if full_parity_coverage else "partial_diagnostic",
             "clock": "time.perf_counter",
             "dispersion": "interquartile_range",
             "memory_measurement": (
@@ -216,18 +226,37 @@ def main() -> int:
         parity = _check_parity(
             optimized,
             reference,
-            prepared[: min(args.parity_documents, len(prepared))],
+            prepared[:parity_document_count],
         )
     except ReferenceParityError as exc:
         failure = {
             **base_payload,
             "status": "parity_failure",
-            "parity": {"passed": False, "error": str(exc)},
+            "parity": {
+                "passed": False,
+                "error": str(exc),
+                "documents_requested": parity_document_count,
+                "documents_available": len(prepared),
+                "full_corpus": full_parity_coverage,
+            },
+            "acceptance": {
+                "eligible": full_parity_coverage,
+                "parity_gate_met": False,
+                "performance_gates_met": None,
+                "passed": False,
+                "reason": "parity_failure",
+            },
         }
         _write_json(output, failure)
         print(f"CLAMP matcher benchmark parity failure: {exc}", file=sys.stderr)
         print(f"Failure details written to {output}", file=sys.stderr)
         return 1
+
+    parity = {
+        **parity,
+        "documents_available": len(prepared),
+        "full_corpus": full_parity_coverage,
+    }
 
     document_count = len(prepared)
     token_count = sum(len(document.tokens) for document in prepared)
@@ -268,10 +297,31 @@ def main() -> int:
         bool(comparisons[name]["target_met"])
         for name in ("cue_matching", "full_mirror", "full_mirror_memory")
     )
+    acceptance_passed = full_parity_coverage and targets_passed
+    status = (
+        "diagnostic_only"
+        if not full_parity_coverage
+        else "ok"
+        if targets_passed
+        else "performance_failure"
+    )
     result = {
         **base_payload,
-        "status": "ok" if targets_passed else "performance_failure",
+        "status": status,
         "parity": parity,
+        "acceptance": {
+            "eligible": full_parity_coverage,
+            "parity_gate_met": full_parity_coverage,
+            "performance_gates_met": targets_passed,
+            "passed": acceptance_passed,
+            "reason": (
+                None
+                if acceptance_passed
+                else "partial_parity_check"
+                if not full_parity_coverage
+                else "performance_targets_not_met"
+            ),
+        },
         "timings": {
             "optimized": optimized_timings,
             "naive_reference": reference_timings,
@@ -280,6 +330,13 @@ def main() -> int:
     }
     _write_json(output, result)
     print(_console_summary(result, output))
+    if not full_parity_coverage:
+        print(
+            "CLAMP matcher benchmark is diagnostic-only because parity did not cover the "
+            "complete generated corpus",
+            file=sys.stderr,
+        )
+        return 0
     if not targets_passed:
         print(
             "CLAMP matcher benchmark failed one or more hard performance targets",
@@ -298,7 +355,7 @@ def _validate_args(args: argparse.Namespace) -> None:
         raise ValueError("--repeats must be at least 1")
     if args.warmups < 0:
         raise ValueError("--warmups cannot be negative")
-    if args.parity_documents < 1:
+    if args.parity_documents is not None and args.parity_documents < 1:
         raise ValueError("--parity-documents must be at least 1")
 
 
@@ -1101,10 +1158,14 @@ def _console_summary(result: dict[str, object], output: Path) -> str:
     full = comparisons["full_mirror"]
     if not isinstance(cue, dict) or not isinstance(full, dict):
         raise TypeError("Benchmark comparison rows are invalid")
+    status = result.get("status")
+    if not isinstance(status, str):
+        raise TypeError("Benchmark status is invalid")
     return (
         "CLAMP matcher benchmark complete: "
         f"cue speedup={float(cue['reference_over_optimized_speedup']):.2f}x, "
-        f"full-mirror speedup={float(full['reference_over_optimized_speedup']):.2f}x; "
+        f"full-mirror speedup={float(full['reference_over_optimized_speedup']):.2f}x, "
+        f"status={status}; "
         f"JSON written to {output}"
     )
 
