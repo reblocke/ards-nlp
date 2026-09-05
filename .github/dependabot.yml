@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # The pinned Amaral Hyperopt runtime still requires pkg_resources.
+      - dependency-name: setuptools
+        versions: [">=81"]
     labels:
       - dependencies
 
