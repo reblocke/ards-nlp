@@ -10,7 +10,8 @@ dependencies = [
   "pandas==2.2.3",
   "scikit-learn==1.6.1",
   "scipy==1.15.2",
-  "setuptools==80.8.0",
+  # Hyperopt 0.2.7 requires pkg_resources; keep setuptools below 81.
+  "setuptools==80.10.2",
   "statsmodels==0.14.4",
   "xgboost==3.0.0",
 ]

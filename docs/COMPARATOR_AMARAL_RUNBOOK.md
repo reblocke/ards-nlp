@@ -14,6 +14,11 @@ runtime imports that module from the verified external clone. Published MIMIC se
 the pinned upstream segmentation functions. Notebook constants are extracted into an ignored
 runtime JSON file rather than copied into tracked source.
 
+The isolated runtime pins setuptools 80.10.2 (`<81`) because Hyperopt 0.2.7 requires
+`pkg_resources`; lift the pin only after replacing that dependency. This inference path neither
+publishes an sdist nor relies on `MANIFEST.in` exclusions, so the packaging-only advisory fixed in
+setuptools 83 does not apply to it.
+
 ## Commands
 
 ```bash
