@@ -1,4 +1,13 @@
 repos:
+  - repo: local
+    hooks:
+      - id: reject-staged-office-documents
+        name: Reject staged private Office documents
+        entry: python scripts/check_staged_office.py
+        language: python
+        pass_filenames: false
+        always_run: true
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

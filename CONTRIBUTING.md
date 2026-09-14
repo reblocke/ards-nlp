@@ -7,16 +7,23 @@
 - Update or add tests when behavior changes.
 - If you make a design/assumption change, write it down in `docs/DECISIONS.md`.
 
-## Optional local hooks
+## Local commit safeguards
 
-If you want git hooks in your local clone:
+Install the local hooks in each working clone before committing:
 
 ```bash
 uv sync --group hooks
 uv run --group hooks pre-commit install
 ```
 
-The default verification flow does not require `pre-commit`.
+The staged-file guard rejects Office documents, including force-added ignored files,
+before they can be committed. Keep institutional intake forms in private document
+storage; dated cohort-request copies are also Git-ignored. The guard allows deletion
+of an already tracked document so that cleanup remains possible.
+
+Hooks are local to each clone and can be bypassed; they do not replace the required
+public-release checks on pull requests. The default CI flow does not require
+`pre-commit`.
 
 ## Definition of done
 
