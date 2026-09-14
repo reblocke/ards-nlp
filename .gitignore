@@ -78,8 +78,7 @@ config/external_comparators/*.yaml
 !/reports/.gitkeep
 
 # Local institutional intake forms (Office artifacts are forbidden from public history).
-/docs/ARDS NLP Cohort Request.docx
-/docs/ARDS NLP Cohort Request_new.docx
+/docs/ARDS NLP Cohort Request*.docx
 
 # Pending synthetic CLAMP fixture is generated locally until release reviews complete.
 /tests/fixtures/clamp_ards_parity/
