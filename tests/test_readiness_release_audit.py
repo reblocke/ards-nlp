@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 from ards_cxr_benchmark.readiness import collect_readiness, readiness_has_blockers
 from ards_cxr_benchmark.release_audit import (
+    audit_approved_binary_artifact_content,
     audit_historical_paths,
     audit_local_markdown_links,
     audit_machine_paths,
@@ -79,6 +81,37 @@ def test_release_audit_allows_only_known_synthetic_historical_data() -> None:
         "data/raw/real_report.txt",
         "docs/internal-presentation.pptx",
     }
+
+
+def test_release_audit_allows_only_attributed_public_pdf() -> None:
+    approved = "docs/2022 Knighton JAMIA Open ARDS alert paper published.pdf"
+    other = "docs/another-paper.pdf"
+
+    assert audit_tracked_paths([approved]) == []
+    assert audit_historical_paths([approved]) == []
+    assert {finding.path for finding in audit_tracked_paths([other])} == {other}
+    assert {finding.path for finding in audit_historical_paths([other])} == {other}
+
+
+def test_release_audit_rejects_modified_approved_pdf(tmp_path: Path, monkeypatch) -> None:
+    approved = "docs/2022 Knighton JAMIA Open ARDS alert paper published.pdf"
+    pdf = tmp_path / approved
+    pdf.parent.mkdir()
+    pdf.write_bytes(b"different PDF")
+
+    def fake_run(command, **kwargs):
+        if command[1] == "rev-list":
+            return SimpleNamespace(stdout=f"{'a' * 40} {approved}\n")
+        return SimpleNamespace(stdout=b"different PDF")
+
+    monkeypatch.setattr("ards_cxr_benchmark.release_audit.subprocess.run", fake_run)
+
+    findings = audit_approved_binary_artifact_content(tmp_path, [approved])
+
+    assert [(finding.check, finding.path) for finding in findings] == [
+        ("unapproved_binary_content", approved),
+        ("historical_unapproved_binary_content", approved),
+    ]
 
 
 def test_release_audit_detects_machine_paths(tmp_path: Path) -> None:
