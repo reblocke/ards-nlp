@@ -3,6 +3,16 @@
 This repository contains adapters and provenance metadata for external research software. External
 source, data, models, and licensed resources are not relicensed by the repository's MIT License.
 
+## Knighton et al. JAMIA Open Article
+
+- File: `docs/2022 Knighton JAMIA Open ARDS alert paper published.pdf`
+- Citation: Knighton AJ, et al. An alert tool to promote lung protective ventilation for possible
+  acute respiratory distress syndrome. *JAMIA Open*. 2022;5(2):ooac050.
+- DOI: `https://doi.org/10.1093/jamiaopen/ooac050`
+- License: Creative Commons Attribution 4.0 International, as stated in the article.
+- SHA-256: `3ee913cfdc6f9fa5845f9988eefa36b1ef6b8918a06d20973bb7251727e19437`
+- This article remains under its own license; the repository's MIT License does not apply to it.
+
 ## Legacy ARDS CLAMP Compatibility
 
 The repository contains no CLAMP executable and no exported CLAMP project.

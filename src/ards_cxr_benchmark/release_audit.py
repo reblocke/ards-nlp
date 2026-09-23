@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import subprocess
 from dataclasses import dataclass
@@ -47,8 +48,15 @@ FORBIDDEN_OUTPUT_SUFFIXES = {
     ".xmi",
     ".zip",
 }
-ALLOWED_BINARY_ARTIFACT_PATHS: set[str] = set()
-ALLOWED_HISTORICAL_BINARY_ARTIFACT_PATHS: set[str] = set()
+# The sole approved binary is a CC BY 4.0 open-access article, attributed in
+# docs/THIRD_PARTY_NOTICES.md. Keep this exception path-specific.
+APPROVED_BINARY_ARTIFACT_SHA256 = {
+    "docs/2022 Knighton JAMIA Open ARDS alert paper published.pdf": (
+        "3ee913cfdc6f9fa5845f9988eefa36b1ef6b8918a06d20973bb7251727e19437"
+    ),
+}
+ALLOWED_BINARY_ARTIFACT_PATHS = set(APPROVED_BINARY_ARTIFACT_SHA256)
+ALLOWED_HISTORICAL_BINARY_ARTIFACT_PATHS = ALLOWED_BINARY_ARTIFACT_PATHS
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 URL_PATTERN = re.compile(r"(?:https?|ftp)://\S+")
 POSIX_ABSOLUTE_PATH_PATTERN = re.compile(
@@ -94,9 +102,50 @@ def audit_repository(root: Path) -> list[AuditFinding]:
     tracked = tracked_files(root)
     findings = audit_tracked_paths(tracked)
     findings.extend(audit_historical_paths(historical_files(root)))
+    findings.extend(audit_approved_binary_artifact_content(root, tracked))
     findings.extend(audit_machine_paths(root, tracked))
     findings.extend(audit_local_markdown_links(root, tracked))
     return sorted(findings, key=lambda item: (item.check, item.path, item.detail))
+
+
+def audit_approved_binary_artifact_content(root: Path, tracked: list[str]) -> list[AuditFinding]:
+    findings: list[AuditFinding] = []
+    for path, expected_sha256 in APPROVED_BINARY_ARTIFACT_SHA256.items():
+        if path in tracked and (root / path).is_file():
+            actual_sha256 = hashlib.sha256((root / path).read_bytes()).hexdigest()
+            if actual_sha256 != expected_sha256:
+                findings.append(
+                    AuditFinding(
+                        "unapproved_binary_content", path, "approved PDF bytes have changed"
+                    )
+                )
+
+        objects = subprocess.run(
+            ["git", "rev-list", "--objects", "--all", "--", path],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        for line in objects.stdout.splitlines():
+            object_id, _, object_path = line.partition(" ")
+            if object_path != path:
+                continue
+            content = subprocess.run(
+                ["git", "cat-file", "blob", object_id],
+                cwd=root,
+                check=True,
+                capture_output=True,
+            ).stdout
+            if hashlib.sha256(content).hexdigest() != expected_sha256:
+                findings.append(
+                    AuditFinding(
+                        "historical_unapproved_binary_content",
+                        path,
+                        f"unapproved PDF bytes exist in Git object {object_id}",
+                    )
+                )
+    return findings
 
 
 def tracked_files(root: Path) -> list[str]:
