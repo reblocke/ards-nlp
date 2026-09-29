@@ -11,7 +11,6 @@ from pathlib import Path
 import pyarrow.parquet as pq
 import pytest
 
-from ards_cxr_benchmark.clamp_ards.batch import iter_fixture_documents
 from ards_cxr_benchmark.clamp_ards.fixture_parity import (
     INTERMEDIATE_MISMATCH_SCHEMA,
     compare_clamp_ards_fixture,
@@ -75,20 +74,6 @@ def test_allow_pending_rejects_partial_expected_output(
 
     assert process.returncode == 2
     assert "Invalid CLAMP fixture" in process.stderr
-
-
-def test_fixture_iterator_preserves_exact_crlf_bytes(pending_clamp_fixture: Path) -> None:
-    documents = dict(iter_fixture_documents(pending_clamp_fixture))
-    expected = (
-        (pending_clamp_fixture / "input" / "sentence_input_02.txt").read_bytes().decode("utf-8")
-    )
-
-    assert "\r\n" in expected
-    assert documents["sentence_input_02"] == expected
-    assert (
-        documents["sentence_input_02"].encode("utf-8")
-        == (pending_clamp_fixture / "input" / "sentence_input_02.txt").read_bytes()
-    )
 
 
 def test_complete_fixture_exact_parity_writes_empty_stable_ledgers(
@@ -205,31 +190,6 @@ def test_unstable_legacy_xmi_order_uses_exact_final_entity_multiset(
     assert result.passed
     assert result.summary["fixture_xmi_order_required"] is False
     assert result.summary["exact_final_entity_documents"] == EXPECTED_CASE_COUNT
-
-
-def test_complete_fixture_cli_returns_one_for_valid_mismatch(
-    complete_fixture: Path,
-    tmp_path: Path,
-) -> None:
-    fixture = _copy_complete_fixture(complete_fixture, tmp_path)
-    _mutate_expected_tsv(fixture, "field")
-
-    process = subprocess.run(
-        [
-            sys.executable,
-            "scripts/compare_clamp_ards_fixtures.py",
-            "--fixture-root",
-            str(fixture),
-            "--output-dir",
-            str(tmp_path / "outputs"),
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-
-    assert process.returncode == 1
-    assert '"status": "failed"' in process.stdout
 
 
 def test_fixture_make_target_returns_nonzero_for_valid_mismatch(

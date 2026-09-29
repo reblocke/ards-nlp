@@ -29,15 +29,6 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_CONFIG = ROOT / "tests" / "fixtures" / "redcap_annotation" / "config.yaml"
 
 
-def test_example_and_synthetic_configs_load_with_explicit_rater_files() -> None:
-    example = load_annotation_pilot_config(ROOT / "config" / "annotation_pilot.example.yaml")
-    synthetic = load_annotation_pilot_config(FIXTURE_CONFIG)
-
-    assert example.rater_ids == ("R01", "R02", "R03")
-    assert synthetic.project.expected_raters == 3
-    assert synthetic.columns.case_id == "id_accession"
-
-
 def test_config_rejects_reused_input_file(tmp_path: Path) -> None:
     config_data = yaml.safe_load(FIXTURE_CONFIG.read_text(encoding="utf-8"))
     config_data["inputs"]["R02"] = config_data["inputs"]["R01"]

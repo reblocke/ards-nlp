@@ -36,7 +36,7 @@ Treat code as a sequence of falsifiable claims.
 
 ## 5) Test what matters
 
-- Unit tests for invariants (schema, types, boundary conditions).
+- Prefer E2E tests with verifiable, repeatable artifacts; use isolated tests only for concrete failure modes those workflows miss, following the [testing policy](../AGENTS.md#testing-policy).
 - Regression tests for known failure modes and previous bugs.
 - CI runs tests and linting on every PR.
 
@@ -81,4 +81,4 @@ AI can accelerate implementation, but it increases the risk of subtle errors.
 
 - require agent-produced code to be small, testable, and reviewable
 - insist on explicit assumptions and acceptance tests
-- verify behavior empirically (unit tests + minimal end-to-end runs)
+- verify behavior empirically with end-to-end runs and inspect their artifacts

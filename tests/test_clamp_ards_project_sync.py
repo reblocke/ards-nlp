@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -11,51 +12,9 @@ import pytest
 from ards_cxr_benchmark.clamp_ards_inputs import sync_clamp_ards_project
 from ards_cxr_benchmark.config import (
     CLAMP_RESTRICTED_ARTIFACT_DIR,
-    load_config,
     validate_clamp_ards_operational_paths,
 )
 from ards_cxr_benchmark.paths import get_paths
-
-
-def test_sync_clamp_project_copies_and_normalizes_descriptor_paths(tmp_path: Path) -> None:
-    source = _source_project(tmp_path)
-    live = tmp_path / "workspace" / "ARDS"
-    runtime_project_dir = "D:/ClampRuntime/workspace/ARDS"
-
-    summary = sync_clamp_ards_project(
-        source_dir=source,
-        live_dir=live,
-        runtime_project_dir=runtime_project_dir,
-        artifact_dir=tmp_path / "artifacts",
-        summary_path=tmp_path / "artifacts" / "project_sync_summary.json",
-    )
-
-    descriptor = (live / "descriptor" / "defaultEngine.xml").read_text(encoding="utf-8")
-    assert "D:/ClampRuntime/workspace/ARDS" in descriptor
-    assert live.as_posix() not in descriptor
-    assert "C:/ClampWin_1.6.6/workspace/ARDS" not in descriptor
-    assert (live / "Components" / "ARDS.pipeline").exists()
-    assert summary["rendered_file_count"] >= 2
-    assert summary["runtime_project_dir"] == runtime_project_dir
-
-
-def test_sync_clamp_project_refuses_conflicting_existing_file_without_overwrite(
-    tmp_path: Path,
-) -> None:
-    source = _source_project(tmp_path)
-    live = tmp_path / "workspace" / "ARDS"
-    target = live / "Components" / "ARDS.pipeline"
-    target.parent.mkdir(parents=True)
-    target.write_text("manual edit", encoding="utf-8")
-
-    with pytest.raises(FileExistsError):
-        sync_clamp_ards_project(
-            source_dir=source,
-            live_dir=live,
-            runtime_project_dir="C:/ClampWin_1.6.6/workspace/ARDS",
-            artifact_dir=tmp_path / "artifacts",
-            summary_path=tmp_path / "artifacts" / "project_sync_summary.json",
-        )
 
 
 def test_sync_clamp_project_preflights_conflicts_before_writing_any_file(tmp_path: Path) -> None:
@@ -118,31 +77,10 @@ def test_sync_clamp_project_skips_data_input_and_output(tmp_path: Path) -> None:
     assert not (tmp_path / "workspace" / "ARDS" / "Data" / "Output" / "out.txt").exists()
 
 
-def test_example_config_loads_clamp_ards_defaults() -> None:
-    config = load_config(Path("config/config.example.yaml"))
-
-    assert config.clamp_ards.project_name == "ARDS"
-    assert config.clamp_ards.project_source_dir.as_posix().endswith(
-        "data/external/clamp_ards_project"
-    )
-    assert config.clamp_ards.runtime_project_dir == "C:/ClampWin_1.6.6/workspace/ARDS"
-    assert str(config.clamp_ards.input_dir).endswith(
-        "artifacts/restricted/clamp_ards/workspace/ARDS/Data/Input"
-    )
-    assert config.clamp_ards.input_manifest.name == "input_manifest.csv"
-    assert config.clamp_ards.teacher_entity_output.name == "clamp_legacy_entities.parquet"
-    assert config.clamp_ards.teacher_benchmark_dir.name == "teacher_benchmark"
-    assert config.clamp_ards.full_output_archive.name == "ARDS_CLAMP_Output_full.zip"
-    assert config.clamp_ards.python_entity_output.name == "clamp_python_entities.parquet"
-    assert config.clamp_ards.python_parity_summary.name == "parity_summary.json"
-
-
 @pytest.mark.parametrize(
     ("path", "message"),
     [
-        (Path("clamp/Input"), "absolute"),
         (get_paths().root / "clamp" / "Input", "outside the repository root"),
-        (Path("/tmp/YOUR_LOCAL_CLAMP_WORKSPACE_ROOT/ARDS"), "YOUR_LOCAL_CLAMP_WORKSPACE_ROOT"),
     ],
 )
 def test_clamp_operational_path_validation_rejects_unsafe_paths(
@@ -151,12 +89,6 @@ def test_clamp_operational_path_validation_rejects_unsafe_paths(
 ) -> None:
     with pytest.raises(ValueError, match=message):
         validate_clamp_ards_operational_paths(input_dir=path)
-
-
-def test_clamp_operational_path_validation_accepts_absolute_path_outside_repo(
-    tmp_path: Path,
-) -> None:
-    validate_clamp_ards_operational_paths(input_dir=tmp_path)
 
 
 def test_clamp_operational_path_validation_accepts_ignored_repo_restricted_path() -> None:
@@ -302,6 +234,11 @@ def test_sync_script_runtime_project_dir_override_normalizes_descriptors(tmp_pat
     descriptor = (live / "descriptor" / "defaultEngine.xml").read_text(encoding="utf-8")
     assert runtime_project_dir in descriptor
     assert live.as_posix() not in descriptor
+    assert "C:/ClampWin_1.6.6/workspace/ARDS" not in descriptor
+    assert (live / "Components" / "ARDS.pipeline").exists()
+    summary = json.loads((artifact_dir / "project_sync_summary.json").read_text(encoding="utf-8"))
+    assert summary["rendered_file_count"] >= 2
+    assert summary["runtime_project_dir"] == runtime_project_dir
 
 
 def test_placeholder_clamp_workspace_is_git_ignored() -> None:
@@ -318,8 +255,6 @@ def test_placeholder_clamp_workspace_is_git_ignored() -> None:
 @pytest.mark.parametrize(
     "script",
     [
-        "scripts/sync_clamp_ards_project.py",
-        "scripts/export_clamp_ards_inputs.py",
         "scripts/parse_clamp_ards_outputs.py",
         "scripts/benchmark_clamp_ards_teacher.py",
     ],

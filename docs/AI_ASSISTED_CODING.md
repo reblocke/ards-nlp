@@ -28,5 +28,5 @@ These principles are baked into the repo structure and workflows:
 
 - A clear plan and acceptance tests.
 - Minimal, reviewable patches.
-- Updated unit tests (or a rationale for why tests are not feasible).
+- E2E verification with repeatable artifacts, following the [testing policy](../AGENTS.md#testing-policy).
 - A brief post-change verification report.

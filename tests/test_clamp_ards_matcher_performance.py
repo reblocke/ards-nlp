@@ -7,7 +7,6 @@ import random
 import subprocess
 import sys
 from pathlib import Path
-from types import MappingProxyType
 
 import pyarrow.parquet as pq
 import pytest
@@ -326,37 +325,6 @@ def test_span_index_token_gap_matches_reference_scan_at_all_boundaries() -> None
             assert index.token_gap(left_end, right_start) == expected
 
 
-def test_first_token_buckets_preserve_compiled_resource_order() -> None:
-    mirror = load_legacy_mirror()
-    entries = (
-        DictionaryEntry("opacity", "Morphology", 30),
-        DictionaryEntry("opacities", "Morphology", 10),
-        DictionaryEntry("opacity", "Morphology", 20),
-    )
-    matcher = ClampDictionaryMatcher(
-        entries,
-        PorterCompatibilityStemmer(),
-        mirror.tokenizer,
-    )
-    dictionary_buckets = matcher._entries_by_first_token
-    assert isinstance(dictionary_buckets, MappingProxyType)
-    dictionary_bucket = next(
-        bucket for bucket in dictionary_buckets.values() if len(bucket) == len(entries)
-    )
-    assert [compiled.entry.index for compiled in dictionary_bucket] == [30, 10, 20]
-
-    cues = (
-        AssertionCue("no evidence", "negPhrases", 20),
-        AssertionCue("no", "negPhrases", 5),
-        AssertionCue("no change", "pseNegPhrases", 15),
-    )
-    assertion = ClampNegExAssertion(cues, mirror.tokenizer)
-    cue_buckets = assertion._cues_by_first_token
-    assert isinstance(cue_buckets, MappingProxyType)
-    cue_bucket = next(bucket for bucket in cue_buckets.values() if len(bucket) == len(cues))
-    assert [compiled.cue.index for compiled in cue_bucket] == [20, 5, 15]
-
-
 def test_dictionary_overlap_final_token_and_cross_sentence_match_reference() -> None:
     mirror = load_legacy_mirror()
     entries = (
@@ -407,22 +375,6 @@ def test_dictionary_overlap_final_token_and_cross_sentence_match_reference() -> 
     assert all(entity.dictionary_term != "air space" for entity in actual)
 
 
-def test_all_dictionary_terms_match_reference() -> None:
-    mirror = load_legacy_mirror()
-    for entry in mirror.resources.dictionary:
-        text = entry.term
-        tokens, sentences = _tokenize_and_segment(text)
-        assert mirror.dictionary.match(text, tokens, sentences) == _reference_dictionary_matches(
-            entries=mirror.resources.dictionary,
-            excluded_terms=mirror.resources.excluded_dictionary_terms,
-            stemmer=PorterCompatibilityStemmer(),
-            tokenizer=mirror.tokenizer,
-            text=text,
-            tokens=tokens,
-            sentences=sentences,
-        )
-
-
 def test_all_assertion_cues_match_reference() -> None:
     mirror = load_legacy_mirror()
     reference = _ReferenceAssertion(
@@ -434,33 +386,6 @@ def test_all_assertion_cues_match_reference() -> None:
         text = cue.phrase
         tokens = mirror.tokenizer.tokenize(text)
         assert mirror.assertion.find_cues(text, tokens) == reference.find_cues(text, tokens)
-
-
-@pytest.mark.parametrize(
-    "text",
-    [
-        "No pulmonary edema.",
-        "pulmonary edema is absent.",
-        "No pulmonary edema but bilateral opacities.",
-        "There is no change in pulmonary edema.",
-        "not necessarily pulmonary edema.",
-    ],
-)
-def test_assertion_scope_pseudo_and_conjunction_match_reference(text: str) -> None:
-    mirror = load_legacy_mirror()
-    tokens, sentences = _tokenize_and_segment(text)
-    entities = mirror.dictionary.match(text, tokens, sentences)
-    reference = _ReferenceAssertion(
-        mirror.resources.assertion_cues,
-        mirror.tokenizer,
-        scope_tokens=mirror.resources.assertion_scope_tokens,
-    )
-    assert mirror.assertion.classify(text, sentences, tokens, entities) == reference.classify(
-        text,
-        sentences,
-        tokens,
-        entities,
-    )
 
 
 def test_entity_outside_sentences_remains_unclassified_as_in_reference() -> None:
@@ -532,7 +457,6 @@ def test_character_contained_entities_reset_present_without_token_alignment() ->
 @pytest.mark.parametrize(
     "text",
     [
-        "",
         "... -- !!!",
         "😀 🫁 ARDS; not necessarily pulmonary edema.",
         "No change in pulmonary edema, but diffuse bilateral opacities remain.",

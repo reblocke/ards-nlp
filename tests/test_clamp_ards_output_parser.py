@@ -106,6 +106,7 @@ def test_output_doc_id_strips_original_txt_suffix_for_xmi_variants(tmp_path: Pat
 
     assert set(output_map) == {"s1"}
     assert duplicate_doc_ids == {"s1"}
+    assert parse_clamp_output_file(xmi).parse_status == "parse_error"
     assert parse_clamp_output_file(xmi).parse_error == "unsupported_output_format:.xmi"
     assert parse_clamp_output_file(xmi_gz).parse_error == "unsupported_output_format:.xmi.gz"
 
@@ -140,16 +141,6 @@ def test_parser_fails_when_all_matched_files_have_no_recognized_fields(tmp_path:
 
     with pytest.raises(ValueError, match="recognized CLAMP fields"):
         parse_clamp_ards_outputs(input_manifest_path=manifest, output_dir=output_dir)
-
-
-def test_xmi_output_is_explicit_parse_failure(tmp_path: Path) -> None:
-    output = tmp_path / "s1.xmi"
-    output.write_text("<xmi />", encoding="utf-8")
-
-    parsed = parse_clamp_output_file(output)
-
-    assert parsed.parse_status == "parse_error"
-    assert "unsupported_output_format" in parsed.parse_error
 
 
 def test_non_empty_output_without_semantic_field_is_parse_error(tmp_path: Path) -> None:

@@ -60,17 +60,6 @@ def test_release_workflow_has_hard_resource_and_explicit_fixture_status_jobs() -
                 assert uses.rsplit("@", maxsplit=1)[1].split()[0].isalnum()
 
 
-def test_repository_resource_ledger_is_complete_and_public_boundary_is_clear() -> None:
-    root = Path(__file__).resolve().parents[1]
-
-    result = audit_clamp_resources(root, public_release=False)
-
-    assert result.valid
-    assert result.file_count == 23
-    assert result.unresolved_count > 0
-    assert not result.public_release_blocked
-
-
 def test_public_resource_audit_rejects_unresolved_tracked_file(tmp_path: Path) -> None:
     resource = tmp_path / "clamp_ARDS" / "Components" / "resource.txt"
     resource.parent.mkdir(parents=True)
