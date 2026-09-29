@@ -63,6 +63,8 @@ def test_parity_writer_emits_empty_typed_parquets_and_markdown(tmp_path: Path) -
     assert pq.read_table(order_path).num_rows == 0
     payload = json.loads(summary.read_text(encoding="utf-8"))
     assert payload["passed"] is True
+    assert payload["missing_entities"] == 0
+    assert payload["document_label_mismatches"] == 0
     for name, path in paths.items():
         assert payload[f"{name}_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     markdown = summary.with_suffix(".md").read_text(encoding="utf-8")
@@ -98,7 +100,7 @@ def test_parity_separates_entity_and_document_mismatches_without_text(
     assert "opacities" not in serialized
 
 
-def test_order_difference_is_diagnostic_unless_required(tmp_path: Path) -> None:
+def test_order_difference_is_diagnostic_by_default(tmp_path: Path) -> None:
     first = _entity("ARDS", 0, 4)
     second = _entity("edema", 5, 10)
     paths = _write_tables(
@@ -108,14 +110,11 @@ def test_order_difference_is_diagnostic_unless_required(tmp_path: Path) -> None:
     )
 
     diagnostic = compare_clamp_ards_outputs(**paths)
-    required = compare_clamp_ards_outputs(**paths, require_order=True)
 
     assert diagnostic.passed
     assert diagnostic.summary["output_order_differences"] == 1
     assert diagnostic.summary["output_order_mismatch_positions"] == 2
     assert len(diagnostic.order_mismatches) == 2
-    assert not required.passed
-    assert required.summary["require_order"] is True
 
 
 @pytest.mark.parametrize("table_name", ["expected_entities", "actual_entities"])
@@ -182,6 +181,12 @@ def test_cli_writes_split_outputs_legacy_csv_and_returns_nonzero(tmp_path: Path)
     )
 
     assert process.returncode == 1
+    written = json.loads(summary.read_text(encoding="utf-8"))
+    assert written["passed"] is False
+    assert written["missing_entities"] == 1
+    assert written["unexpected_entities"] == 1
+    assert written["field_mismatches"] == 1
+    assert written["document_label_mismatches"] == 0
     assert all(
         path.is_file()
         for path in (

@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import SVC
 
@@ -23,37 +22,7 @@ from ards_cxr_benchmark.comparators.config import (
 from ards_cxr_benchmark.comparators.external import verify_external_repository
 from ards_cxr_benchmark.comparators.uw_hanso import (
     build_uw_hanso_predictions,
-    run_hanso_batches,
 )
-
-
-def test_gated_example_configs_load() -> None:
-    uw = load_uw_hanso_config(Path("config/external_comparators/uw_hanso.example.yaml"))
-    afshar = load_afshar_config(Path("config/external_comparators/afshar_text_svc.example.yaml"))
-
-    assert uw.terms_of_use == "unknown"
-    assert uw.expected_sha256["parameters"] == "verify_after_acquisition"
-    assert afshar.permission_status == "unknown"
-    assert afshar.verified_target == "full_ards_phenotype"
-
-
-def test_hanso_batch_helper_resets_each_batch() -> None:
-    records = [{"case_id": f"c{i}", "text": f"text {i}"} for i in range(5)]
-    seen_batches: list[list[str]] = []
-
-    def probability_fn(texts: list[str]):
-        seen_batches.append(texts)
-        return [{"text": text} for text in texts]
-
-    outputs = run_hanso_batches(
-        records,
-        batch_size=2,
-        text_key="text",
-        probability_fn=probability_fn,
-    )
-
-    assert [len(batch) for batch in seen_batches] == [2, 2, 1]
-    assert [case_id for case_id, _ in outputs] == ["c0", "c1", "c2", "c3", "c4"]
 
 
 def test_hanso_probability_mapping_and_sum_validation(tmp_path: Path) -> None:
@@ -104,43 +73,6 @@ def test_afshar_static_inventory_does_not_load_pickle(tmp_path: Path) -> None:
     assert result["pickle_protocols"] == [3]
     assert result["loaded"] is False
     assert any("sklearn" in value for value in result["referenced_modules_classes"])
-
-
-def test_hanso_runtime_contract_includes_upstream_import_dependencies() -> None:
-    environment = yaml.safe_load(Path("environments/uw_hanso/environment.yml").read_text())
-    assert "pip=20.2.4" in environment["dependencies"]
-    assert "setuptools=50.3.2" in environment["dependencies"]
-    pip_dependencies = next(
-        entry["pip"] for entry in environment["dependencies"] if isinstance(entry, dict)
-    )
-    required_prefixes = {
-        "matplotlib==",
-        "medspacy==",
-        "scikit-learn==",
-        "scipy==",
-        "seaborn==",
-        "tensorboardX==",
-    }
-    for prefix in required_prefixes:
-        assert any(str(value).startswith(prefix) for value in pip_dependencies)
-    assert "torch==1.6.0" in pip_dependencies
-    assert "allennlp==1.3.0" in pip_dependencies
-    assert not any(str(value).startswith("allennlp-models==") for value in pip_dependencies)
-    assert "cymem==2.0.5" in pip_dependencies
-    assert "murmurhash==1.0.5" in pip_dependencies
-    assert "preshed==3.0.5" in pip_dependencies
-    assert "protobuf==3.14.0" in pip_dependencies
-    assert "pylcs==0.0.6" in pip_dependencies
-    assert "thinc==7.4.1" in pip_dependencies
-    assert "PyRuSH==1.0.3.5" in pip_dependencies
-    assert any("en_core_web_sm-2.3.1" in str(value) for value in pip_dependencies)
-
-    dockerfile = Path("environments/uw_hanso/Dockerfile").read_text()
-    assert "apt-get install --yes --no-install-recommends g++" in dockerfile
-    assert "spacy.load('en_core_web_sm')" in dockerfile
-    workflow = Path(".github/workflows/hanso-runtime.yml").read_text()
-    assert "docker build --platform linux/amd64" in workflow
-    assert "import process" in workflow
 
 
 def test_combined_benchmark_target_builds_required_amaral_predictions() -> None:

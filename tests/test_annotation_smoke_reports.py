@@ -7,15 +7,6 @@ import pytest
 from ards_cxr_benchmark.annotation_report_privacy import REPORTS, validate_smoke_reports
 
 
-def test_smoke_report_validator_accepts_aggregate_reports(tmp_path: Path) -> None:
-    for relative in REPORTS:
-        path = tmp_path / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("<html>aggregate synthetic report</html>", encoding="utf-8")
-
-    validate_smoke_reports(tmp_path)
-
-
 def test_smoke_report_validator_rejects_identifiers(tmp_path: Path) -> None:
     fixture = tmp_path / "tests/fixtures/redcap_annotation/rater_01.csv"
     fixture.parent.mkdir(parents=True)

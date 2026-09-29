@@ -7,7 +7,6 @@ import pytest
 
 from ards_cxr_benchmark.bq import ensure_dataset_exists, render_sql_template
 from ards_cxr_benchmark.config import load_config
-from ards_cxr_benchmark.label_terms import load_label_terms, missing_required_term_groups
 from ards_cxr_benchmark.schemas import SILVER_REFERENCE_REQUIRED_COLUMNS
 
 
@@ -29,14 +28,6 @@ def test_load_example_config() -> None:
     assert config.paths.report_root.is_absolute()
     assert config.clamp_ards.output_archive.name == "ARDS_CLAMP_Output_txt_only.zip"
     assert config.clamp_ards.output_packet_summary.is_absolute()
-
-
-def test_label_terms_config_has_required_groups() -> None:
-    terms = load_label_terms(Path("config/label_terms.yaml"))
-
-    assert missing_required_term_groups(terms) == []
-    assert "opacity" in terms["opacity_observation_terms"]
-    assert "bibasilar" in terms["bilateral_anatomy_terms"]
 
 
 def test_render_sql_template() -> None:

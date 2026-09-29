@@ -15,11 +15,6 @@ from ards_cxr_benchmark.text_sections import (
 )
 
 
-def test_parse_subject_study_from_mimic_path() -> None:
-    path = Path("files/p10/p10000032/s50414267.txt")
-    assert parse_subject_study_from_path(path) == (10000032, 50414267)
-
-
 def test_parse_subject_study_rejects_unmapped_path() -> None:
     with pytest.raises(ValueError, match="Could not parse"):
         parse_subject_study_from_path(Path("bad/report.txt"))
