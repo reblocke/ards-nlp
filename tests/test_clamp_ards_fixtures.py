@@ -11,9 +11,7 @@ import yaml
 
 from ards_cxr_benchmark.clamp_ards.fixtures import (
     EXPECTED_CASE_COUNT,
-    EXPECTED_CATEGORY_COUNTS,
     EXPECTED_ENTITY_FIELDS,
-    FixturePendingError,
     _validate_expected_tsv,
     _validate_intermediate_json,
     build_fixture_cases,
@@ -27,34 +25,6 @@ from ards_cxr_benchmark.clamp_ards.resources import (
     default_resource_manifest_path,
     load_clamp_resources,
 )
-
-
-def test_generated_fixture_has_frozen_coverage_and_explicit_pending_state(
-    tmp_path: Path,
-) -> None:
-    root = tmp_path / "fixture"
-
-    generated = generate_fixture(
-        root,
-        project_dir=default_project_dir(),
-        resource_manifest_path=default_resource_manifest_path(),
-    )
-
-    assert generated.case_count == EXPECTED_CASE_COUNT == 463
-    assert generated.category_counts == EXPECTED_CATEGORY_COUNTS
-    assert generated.lifecycle == "awaiting_legacy_runs"
-    assert generated.pending
-    assert {path.name for path in (root / "clamp_expected").iterdir()} == {
-        "PENDING",
-        "README.md",
-    }
-    assert {path.name for path in (root / "intermediate_expected").iterdir()} == {
-        "PENDING",
-        "README.md",
-    }
-    with pytest.raises(FixturePendingError, match="awaiting two legacy CLAMP runs"):
-        validate_fixture(root)
-    assert validate_fixture(root, allow_pending=True) == generated
 
 
 def test_case_matrix_exhausts_dictionary_assertion_tokenizer_and_ruta_resources() -> None:

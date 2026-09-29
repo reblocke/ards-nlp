@@ -6,7 +6,7 @@ help:
 	@echo "  uv-sync   Create/update the local env from uv.lock"
 	@echo "  fmt       Format code (ruff)"
 	@echo "  lint      Lint code (ruff)"
-	@echo "  test      Run unit tests (pytest)"
+	@echo "  test      Run workflow and regression tests (pytest)"
 	@echo "  run       Print benchmark configuration summary"
 	@echo "  doctor    Print readiness for annotation, comparator, and full-build use cases"
 	@echo "  doctor-*  Strict readiness check for one collaborator use case"

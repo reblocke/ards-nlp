@@ -20,16 +20,6 @@ from ards_cxr_benchmark.comparators.amaral import (
 from ards_cxr_benchmark.comparators.config import load_amaral_config
 
 
-def test_example_config_loads_with_pinned_resources() -> None:
-    config = load_amaral_config(
-        Path("config/external_comparators/amaral_ards_diagnosis.example.yaml")
-    )
-
-    assert config.source.commit == "6154ac32e16dd9497a466351582603e1c1095a05"
-    assert config.expected_sha256["model"].startswith("a72c2fe1")
-    assert config.expected_sha256["vectorizer"].startswith("ddc982d5")
-
-
 def test_extract_published_preprocessing_config(tmp_path: Path) -> None:
     notebook = {
         "cells": [

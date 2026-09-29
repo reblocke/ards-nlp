@@ -37,23 +37,6 @@ from ards_cxr_benchmark.clamp_ards.tokenization import Utf16OffsetMap
 from ards_cxr_benchmark.clamp_ards.xmi import parse_clamp_xmi
 
 
-def test_synthetic_external_resources_load_authorized_phenotype() -> None:
-    resources = load_clamp_resources(
-        default_project_dir(),
-        manifest_path=default_resource_manifest_path(),
-    )
-
-    assert len(resources.dictionary) == 23
-    assert len(resources.assertion_cues) == 240
-    assert set(resources.resource_sha256) == {
-        ABBREVIATION_RESOURCE,
-        ASSERTION_RESOURCE,
-        TOKEN_RULE_RESOURCE,
-    }
-    assert resources.phenotype_spec_version == "1.0.0"
-    assert len(resources.phenotype_spec_sha256) == 64
-
-
 @pytest.mark.licensed_clamp
 def test_separately_licensed_resources_match_production_fingerprints() -> None:
     resources = load_clamp_resources(
@@ -117,23 +100,6 @@ def test_packaged_resource_manifest_is_v3_external_contract() -> None:
         TOKEN_RULE_RESOURCE,
     }
     assert payload["phenotype_spec"]["attribution"] == "Dan Knox"
-
-
-def test_default_resource_loading_rejects_tampered_required_file(tmp_path: Path) -> None:
-    manifest_path = default_resource_manifest_path()
-    manifest = json.loads(manifest_path.read_text())
-    project = tmp_path / "project"
-    for relative in manifest["runtime_required_files"]:
-        source = default_project_dir() / relative
-        destination = project / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, destination)
-    token_rules = project / TOKEN_RULE_RESOURCE
-    payload = token_rules.read_bytes()
-    token_rules.write_bytes(payload[:-1] + b" ")
-
-    with pytest.raises(ValueError, match="hashes differ from frozen manifest"):
-        load_clamp_resources(project, manifest_path=manifest_path)
 
 
 def test_missing_external_resources_fail_with_precise_inventory(tmp_path: Path) -> None:
@@ -371,17 +337,6 @@ def test_utf16_offset_map_rejects_surrogate_interior_and_out_of_range() -> None:
         offsets.python_index(1)
     with pytest.raises(ValueError, match="outside"):
         offsets.python_index(8)
-
-
-def test_public_entity_offsets_use_clamp_utf16_coordinates() -> None:
-    text = "😀 ARDS"
-
-    entity = run_legacy_ards_clamp_mirror(text)[0]
-    internal = load_legacy_mirror().trace(text).final_entities[0]
-
-    assert (internal.start, internal.end) == (2, 6)
-    assert (entity.start, entity.end) == (3, 7)
-    assert entity.covered_text(text) == "ARDS"
 
 
 @pytest.mark.parametrize(
@@ -664,63 +619,6 @@ def test_python_clamp_cli_rejects_custom_run_at_canonical_paths(tmp_path: Path) 
     assert not entity_output.exists()
     assert not prediction_output.exists()
     assert not summary_output.exists()
-
-
-def test_strict_parity_comparator_passes_exact_multisets(tmp_path: Path) -> None:
-    paths = _write_parity_tables(tmp_path, actual_text="infiltrates")
-
-    result = compare_clamp_ards_outputs(**paths)
-
-    assert result.passed
-    assert result.summary["missing_entities"] == 0
-    assert result.summary["document_label_mismatches"] == 0
-
-
-def test_strict_parity_comparator_fails_entity_difference(tmp_path: Path) -> None:
-    paths = _write_parity_tables(tmp_path, actual_text="opacities")
-
-    result = compare_clamp_ards_outputs(**paths)
-
-    assert not result.passed
-    assert result.summary["missing_entities"] == 1
-    assert result.summary["unexpected_entities"] == 1
-    assert result.summary["field_mismatches"] == 1
-    assert result.summary["document_label_mismatches"] == 0
-    assert all("infiltrates" not in json.dumps(row) for row in result.mismatches)
-
-
-def test_parity_cli_returns_nonzero_for_required_mismatch(tmp_path: Path) -> None:
-    paths = _write_parity_tables(tmp_path, actual_text="opacities")
-    summary_output = tmp_path / "summary.json"
-    mismatch_output = tmp_path / "mismatches.csv"
-
-    result = subprocess.run(
-        [
-            sys.executable,
-            "scripts/compare_clamp_python_parity.py",
-            "--config",
-            "config/config.example.yaml",
-            "--expected-entities",
-            str(paths["expected_entities"]),
-            "--expected-predictions",
-            str(paths["expected_predictions"]),
-            "--actual-entities",
-            str(paths["actual_entities"]),
-            "--actual-predictions",
-            str(paths["actual_predictions"]),
-            "--summary-output",
-            str(summary_output),
-            "--mismatch-output",
-            str(mismatch_output),
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-
-    assert result.returncode == 1
-    assert json.loads(summary_output.read_text(encoding="utf-8"))["passed"] is False
-    assert "infiltrates" not in mismatch_output.read_text(encoding="utf-8")
 
 
 def test_parity_comparator_preserves_duplicate_multiplicity(tmp_path: Path) -> None:

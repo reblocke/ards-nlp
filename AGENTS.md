@@ -7,7 +7,7 @@
 - `src/ards_cxr_benchmark/` - importable package code for config, parsing, RadGraph flattening, BigQuery helpers, QA, and label logic.
 - `scripts/` - thin orchestration and entrypoints.
 - `sql/` - parameterized BigQuery SQL for discovery, derived tables, QA, sampling, and exports.
-- `tests/` - pytest coverage for reusable code and pipeline behavior.
+- `tests/` - workflow tests and isolated checks for failure modes E2E tests miss.
 - `data/raw/`, `data/external/`, `data/processed/`, `data/derived/` - input and generated datasets.
 - `artifacts/`, `reports/`, `docs/`, `notebooks/`, `config/` - outputs, docs, exploration, and config examples.
 
@@ -68,9 +68,17 @@ Consult the relevant runbook before using its workflow; these are separate workf
 - Annotation planning consumes aggregate pilot outputs only; retraining case counts are workload
   examples until empirical learning curves exist.
 
+## Testing Policy
+- Never write unit tests after you write code.
+- Highly prefer E2E tests as the sole testing mechanism. Use them to verify complex features work. At the end of E2E tests, produce a verifiable and repeatable artifact.
+- If you must test a system in isolation, first write down all the ways it could fail, then write the code.
+- Before adding an isolated test, identify the concrete failure it catches and why existing E2E coverage misses it. Do not add tests that merely restate implementation details or duplicate workflow assertions.
+- Keep E2E artifacts in the existing ignored output directories, record the inputs/configuration and rerun command, and verify the resulting content. A successful exit or a file's existence alone does not establish correctness.
+- Pending licensed, cloud, or restricted-data workflows are coverage gaps; synthetic smoke tests do not replace their acceptance evidence.
+
 ## Done Criteria
 - An implementation request includes local edits, applicable safe checks, and resolving regressions caused by the change. Complete that scope; preserve licensed, restricted-data, resource-review, and scientific acceptance gates.
-- Documentation-only changes need affected-reference checks and `git diff --check`. For code changes, run focused pytest tests and Ruff checks on touched code; broaden for shared contracts or unresolved failures.
+- Documentation-only changes need affected-reference checks and `git diff --check`. For code changes, run applicable E2E workflows and verify their artifacts, retained isolated tests for relevant coverage gaps, and Ruff checks on touched code; broaden for shared contracts or unresolved failures.
 - Run `make run` when config loading or CLI wiring changes. `make qa` and other cloud/data targets require both authorized scope and configured access/inputs; credentials alone do not authorize them.
 - Keep the mandatory public resource audit on every PR. Synthetic/CI coverage cannot accept licensed fixtures or restricted full-corpus parity; retain all pending reviews and evidence requirements below.
 - Report commands actually run and unavailable gates. Leave unknown repo facts as `VERIFY` or `TODO` markers.

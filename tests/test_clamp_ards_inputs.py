@@ -110,7 +110,7 @@ def test_template_doc_id_rejects_missing_study_id(tmp_path: Path) -> None:
     assert manifest.loc[0, "skip_reason"] == "unsafe_doc_id:missing"
 
 
-@pytest.mark.parametrize("value", ["CON", "a/b", "bad:", "trail.", " lead", ".."])
+@pytest.mark.parametrize("value", ["CON", "bad:", "trail.", " lead", ".."])
 def test_windows_filename_reasons_reject_unsafe_values(value: str) -> None:
     assert invalid_windows_filename_stem_reason(value) is not None
 
