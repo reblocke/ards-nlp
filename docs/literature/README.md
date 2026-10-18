@@ -11,3 +11,10 @@ see `docs/THIRD_PARTY_NOTICES.md`. Other PDFs remain excluded.
 Local retrieval packets may be generated under `artifacts/literature/`, which is ignored by git.
 If a local PDF copy is ever kept under `data/external/literature/`, it must remain untracked and
 have a `.source.json` provenance sidecar.
+
+## Index
+
+- [ARDS continuous subphenotyping](ards-continuous-subphenotyping.md): interpretation of binary
+  labels and continuous or probabilistic disease representations.
+- [Caldonazzo 2026: CXR-CT agreement](caldonazzo-2026-cxr-ct-agreement.md): imaging-reference
+  uncertainty, report-image alignment, and implications for ARDS NLP validation and writing.
